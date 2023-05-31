@@ -14,6 +14,7 @@ exports.registration = async (req, res) => {
         req.body.email = email.split(" ").join("").toLowerCase();
         let user = await User.findOne({
             $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }],
+            userType: "LAWYER",
         });
         if (!user) {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
@@ -46,9 +47,13 @@ exports.loginWithPhone = async (req, res) => {
         });
         userObj.otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
         userObj.accountVerification = false;
-        const updated = await User.findOneAndUpdate({ phone: phone }, userObj, {
-            new: true,
-        });
+        const updated = await User.findOneAndUpdate(
+            { phone: phone, userType: "LAWYER" },
+            userObj,
+            {
+                new: true,
+            }
+        );
         res.status(200).send({ userId: updated._id, otp: updated.otp });
     } catch (error) {
         console.error(error);
@@ -68,7 +73,7 @@ exports.signin = async (req, res) => {
         if (!isValidPassword) {
             return res.status(401).send({ message: "Wrong password" });
         }
-        const accessToken = jwt.sign({ id: user.email }, authConfig.secret, {
+        const accessToken = jwt.sign({ id: user._id }, authConfig.secret, {
             expiresIn: authConfig.accessTokenTime,
         });
         res.status(201).send({ data: user, accessToken: accessToken });
@@ -87,13 +92,12 @@ exports.verifyOtp = async (req, res) => {
         if (user.otp !== otp || user.otpExpiration < Date.now()) {
             return res.status(400).json({ message: "Invalid OTP" });
         }
-        userObj.accountVerification = true;
         const updated = await User.findByIdAndUpdate(
-            { id: user._id },
-            userObj,
+            { _id: user._id },
+            { accountVerification: true },
             { new: true }
         );
-        const accessToken = jwt.sign({ id: user.phone }, authConfig.secret, {
+        const accessToken = jwt.sign({ id: user._id }, authConfig.secret, {
             expiresIn: authConfig.accessTokenTime,
         });
         res.status(200).send({
@@ -118,9 +122,10 @@ exports.resendOTP = async (req, res) => {
             specialChar: false,
         });
         const otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
+        const accountVerification = false;
         const updated = await User.findOneAndUpdate(
             { _id: id },
-            { otp, otpExpiration },
+            { otp, otpExpiration, accountVerification },
             { new: true }
         );
         res.status(200).send({ message: "OTP resent", otp: otp });
@@ -159,12 +164,22 @@ exports.resetPassword = async (req, res) => {
 };
 exports.update = async (req, res) => {
     try {
-        const { name, email, phone, password, bio, hearingFee, image, experiance, languages } = req.body;
-        const user = await User.findById(req.params.id);
+        const {
+            fullName,
+            email,
+            phone,
+            password,
+            bio,
+            hearingFee,
+            image,
+            experiance,
+            languages,
+        } = req.body;
+        const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
         }
-        user.name = name || user.name;
+        user.fullName = fullName || user.fullName;
         user.email = email || user.email;
         user.phone = phone || user.phone;
         user.image = image || user.image;
@@ -180,7 +195,9 @@ exports.update = async (req, res) => {
         res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
         console.log(err);
-        res.status(500).send({ message: "internal server error " + err.message,});
+        res.status(500).send({
+            message: "internal server error " + err.message,
+        });
     }
 };
 exports.createCase = async (req, res) => {
@@ -219,8 +236,8 @@ exports.updateCase = async (req, res) => {
 };
 exports.getCase = async (req, res) => {
     try {
-        if (req.Params.lawyer != (null || undefined)) {
-            const data = await caseModel.find({ lawyer: req.Params.lawyer });
+        if (req.query.lawyer != (null || undefined)) {
+            const data = await caseModel.find({ lawyer: req.query.lawyer });
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
@@ -270,6 +287,22 @@ exports.deleteCase = async (req, res) => {
         });
     }
 };
+exports.skillExpertise = async (req, res) => {
+    try {
+        let findSkill = await skillExpertise.findOne({ userId: req.user.id });
+        if (findSkill) {
+            res.status(200).send({ msg: "skill data found", data: findSkill });
+        } else {
+            return res.status(404).send({ msg: "not found" });
+        }
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
 exports.addskill = async (req, res) => {
     try {
         let findSkill = await skillExpertise.findOne({ userId: req.user.id });
@@ -282,7 +315,7 @@ exports.addskill = async (req, res) => {
                 skill: req.body.skill,
             };
             skill.push(obj);
-            const data = await skillExpertise.findOne(
+            const data = await skillExpertise.findOneAndUpdate(
                 { userId: req.user.id },
                 { $set: { skill: skill } },
                 { new: true }
@@ -321,7 +354,7 @@ exports.addExpertise = async (req, res) => {
                 expertise: req.body.expertise,
             };
             expertise.push(obj);
-            const data = await skillExpertise.findOne(
+            const data = await skillExpertise.findOneAndUpdate(
                 { userId: req.user.id },
                 { $set: { expertise: expertise } },
                 { new: true }

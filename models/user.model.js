@@ -14,6 +14,9 @@ var userSchema = new schema(
         languageKnow: {
             type: String,
         },
+        image:{
+            type: String,
+        },
         phone: {
             type: String,
         },

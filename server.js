@@ -18,22 +18,13 @@ if (process.env.NODE_ENV == "production") {
 app.get("/", (req, res) => {
     res.send("Hello World!");
 });
-const customer = require("./routes/customer.route");
-const document = require("./routes/document.route");
-const notification = require("./routes/notification.route");
-const lawyer = require("./routes/lawyer.route");
-const admin = require("./routes/admin.route");
-const static = require("./routes/static.route");
-const help = require("./routes/helpandsupport.route");
-
-app.use("/api/v1/", admin);
-app.use("/api/v1/", customer);
-app.use("/api/v1/", document);
-app.use("/api/v1/", notification);
-app.use("/api/v1/", lawyer);
-app.use("/api/v1/", static);
-app.use("/api/v1/", help);
-
+require("./routes/customer.route")(app);
+require("./routes/document.route")(app);
+require("./routes/notification.route")(app);
+require("./routes/lawyer.route")(app);
+require("./routes/admin.route")(app);
+require("./routes/static.route")(app);
+require("./routes/helpandsupport.route")(app);
 mongoose.Promise = global.Promise;
 mongoose.set("strictQuery", true);
 

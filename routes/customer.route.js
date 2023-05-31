@@ -16,6 +16,6 @@ module.exports = (app) => {
     app.post("customer/pastAppointment",  [authJwt.verifyToken], auth.pastAppointment);
     app.post("customer/cancelAppointment",  [authJwt.verifyToken], auth.cancelAppointment);
     app.post("customer/upcomingAppointment",  [authJwt.verifyToken], auth.upcomingAppointment);
-    router.get("customer/Bill/all",  [authJwt.verifyToken],auth.getAllbill);
+    app.get("customer/Bill/all",  [authJwt.verifyToken],auth.getAllbill);
 
 };
