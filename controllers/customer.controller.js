@@ -260,7 +260,7 @@ exports.createAppointment = async (req, res) => {
                 appointmentDate: req.body.date,
                 appointmentType: req.body.appointmentType
             };
-            const Data = await saveDocuments.create(data);
+            const Data = await appointment.create(data);
             return res.status(200).json(Data);
         } else {
             res.status(404).send({ message: "Document not found.", data: {} });

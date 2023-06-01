@@ -20,9 +20,7 @@ exports.registration = async (req, res) => {
     const { phone, email } = req.body;
     try {
         req.body.email = email.split(" ").join("").toLowerCase();
-        let user = await User.findOne({
-            $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }],
-        });
+        let user = await User.findOne({ $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }], userType: "ADMIN" });
         if (!user) {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
             req.body.userType = "ADMIN";
@@ -579,7 +577,7 @@ exports.getBanner = async (req, res) => {
         })
     }
 };
-exports.getByIdBanner  = async (req, res) => {
+exports.getByIdBanner = async (req, res) => {
     try {
         const Banner = await banner.findById({ _id: req.params.id });
         res.status(200).json({
@@ -593,13 +591,13 @@ exports.getByIdBanner  = async (req, res) => {
         })
     }
 };
-exports.DeleteBanner = async(req,res) => {
-    try{
+exports.DeleteBanner = async (req, res) => {
+    try {
         const Banner = await banner.findByIdAndDelete({ _id: req.params.id });
         res.status(200).json({
             message: "Delete Banner ",
         },)
-    }catch(err){
+    } catch (err) {
         res.status(400).json({
             message: err.message
         })
@@ -637,7 +635,7 @@ exports.getCourtCategory = async (req, res) => {
 };
 exports.getCourtCategoryId = async (req, res) => {
     try {
-        const data = await CourtCategory.findById({_id:req.params.id, type: "Court" });
+        const data = await CourtCategory.findById({ _id: req.params.id, type: "Court" });
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -652,7 +650,7 @@ exports.getCourtCategoryId = async (req, res) => {
 };
 exports.updateCourtCategory = async (req, res) => {
     try {
-        req.body.type= "Court";
+        req.body.type = "Court";
         const data = await CourtCategory.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
         });
@@ -670,7 +668,7 @@ exports.updateCourtCategory = async (req, res) => {
 };
 exports.deleteCourtCategory = async (req, res) => {
     try {
-        const data = await CourtCategory.findByIdAndDelete({_id:req.params.id, type: "Court" });
+        const data = await CourtCategory.findByIdAndDelete({ _id: req.params.id, type: "Court" });
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -715,7 +713,7 @@ exports.getCaseCategory = async (req, res) => {
 };
 exports.getCaseCategoryId = async (req, res) => {
     try {
-        const data = await CourtCategory.findById({_id:req.params.id, type: "Case" });
+        const data = await CourtCategory.findById({ _id: req.params.id, type: "Case" });
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -730,7 +728,7 @@ exports.getCaseCategoryId = async (req, res) => {
 };
 exports.updateCaseCategory = async (req, res) => {
     try {
-        req.body.type= "Case";
+        req.body.type = "Case";
         const data = await CourtCategory.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
         });
@@ -748,7 +746,7 @@ exports.updateCaseCategory = async (req, res) => {
 };
 exports.deleteCaseCategory = async (req, res) => {
     try {
-        const data = await CourtCategory.findByIdAndDelete({_id:req.params.id, type: "Case" });
+        const data = await CourtCategory.findByIdAndDelete({ _id: req.params.id, type: "Case" });
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -857,7 +855,7 @@ exports.createCourt = async (req, res) => {
     try {
         const court = { name: req.body.name, courtCategoryId: req.body.courtCategoryId };
         const courtCreated = await Court.create(court);
-        res.status(201).send({message: "Court add successfully",data: courtCreated});
+        res.status(201).send({ message: "Court add successfully", data: courtCreated });
     } catch (err) {
         console.log("#### error while Court create #### ", err.message);
         res.status(500).send({
@@ -882,7 +880,7 @@ exports.getCourt = async (req, res) => {
 };
 exports.getCourtId = async (req, res) => {
     try {
-        const data = await Court.findById({_id:req.params.id });
+        const data = await Court.findById({ _id: req.params.id });
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -897,7 +895,7 @@ exports.getCourtId = async (req, res) => {
 };
 exports.updateCourt = async (req, res) => {
     try {
-        const data = await Court.findByIdAndUpdate(req.params.id, req.body, {new: true});
+        const data = await Court.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -912,7 +910,7 @@ exports.updateCourt = async (req, res) => {
 };
 exports.deleteCourt = async (req, res) => {
     try {
-        const data = await Court.findByIdAndDelete({_id:req.params.id});
+        const data = await Court.findByIdAndDelete({ _id: req.params.id });
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
