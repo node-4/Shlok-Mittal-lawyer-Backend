@@ -86,13 +86,12 @@ exports.verifyOtp = async (req, res) => {
         if (user.otp !== otp || user.otpExpiration < Date.now()) {
             return res.status(400).json({ message: "Invalid OTP" });
         }
-        userObj.accountVerification = true;
-        const updated = await User.findByIdAndUpdate(
-            { id: user._id },
-            userObj,
-            { new: true }
-        );
-        const accessToken = jwt.sign({ id: user._id  }, authConfig.secret, {
+        let userObj;
+        userObj = {
+            accountVerification: true
+        }
+        const updated = await User.findByIdAndUpdate({ _id: user._id },userObj,{ new: true });
+        const accessToken = jwt.sign({ id: user._id }, authConfig.secret, {
             expiresIn: authConfig.accessTokenTime,
         });
         res.status(200).send({
@@ -274,7 +273,7 @@ exports.createAppointment = async (req, res) => {
 };
 exports.upcomingAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({userId: req.user.id, appointmentStatus: "Pending"});
+        const FindAppointment = await appointment.find({ userId: req.user.id, appointmentStatus: "Pending" });
         res.status(200).json({ message: "All Document", data: FindAppointment });
     } catch (err) {
         console.log(err);
@@ -285,7 +284,7 @@ exports.upcomingAppointment = async (req, res) => {
 };
 exports.cancelAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ userId: req.user.id,appointmentStatus: "Cancel"});
+        const FindAppointment = await appointment.find({ userId: req.user.id, appointmentStatus: "Cancel" });
         res.status(200).json({ message: "All Document", data: FindAppointment });
     } catch (err) {
         console.log(err);
@@ -296,7 +295,7 @@ exports.cancelAppointment = async (req, res) => {
 };
 exports.pastAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ userId: req.user.id,appointmentStatus: "Done"});
+        const FindAppointment = await appointment.find({ userId: req.user.id, appointmentStatus: "Done" });
         res.status(200).json({ message: "All Document", data: FindAppointment });
     } catch (err) {
         console.log(err);
