@@ -135,22 +135,19 @@ exports.resendOTP = async (req, res) => {
     }
 };
 exports.resetPassword = async (req, res) => {
-    const { id } = req.params;
+    const { email } = req.body;
     try {
-        const user = await User.findOne({ _id: id });
+        const user = await User.findOne({ email: email });
         if (!user) {
             return res.status(400).send({ message: "User not found" });
         }
         if (req.body.newPassword == req.body.confirmPassword) {
             const updated = await User.findOneAndUpdate(
-                { _id: id },
+                { _id: user._id },
                 { $set: { password: bcrypt.hashSync(req.body.newPassword) } },
                 { new: true }
             );
-            res.status(200).send({
-                message: "Password update successfully.",
-                data: updated,
-            });
+            res.status(200).send({ message: "Password update successfully.", data: updated, });
         } else {
             res.status(501).send({
                 message: "Password Not matched.",

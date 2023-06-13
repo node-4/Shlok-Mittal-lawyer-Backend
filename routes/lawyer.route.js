@@ -9,7 +9,7 @@ module.exports = (app) => {
     app.post("/api/v1/lawyer/signin", [validateUser.signInBody], auth.signin);
     app.post("/api/v1/lawyer/:id", auth.verifyOtp);
     app.post("/api/v1/lawyer/resendotp/:id", auth.resendOTP);
-    app.put("/api/v1/lawyer/resetPassword/:id", auth.resetPassword);
+    app.put("/api/v1/lawyer/resetPassword", auth.resetPassword);
     app.put("/api/v1/lawyer/update", [authJwt.verifyToken], auth.update);
     app.post("/api/v1/lawyer/case/add", [authJwt.verifyToken], auth.createCase);
     app.get("/api/v1/lawyer/case/all", auth.getCase);
