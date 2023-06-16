@@ -110,9 +110,9 @@ exports.verifyOtp = async (req, res) => {
     }
 };
 exports.resendOTP = async (req, res) => {
-    const { id } = req.params;
+    const { phone } = req.params;
     try {
-        const user = await User.findOne({ _id: id });
+        const user = await User.findOne({ phone: phone, userType: "LAWYER" });
         if (!user) {
             return res.status(400).send({ message: "User not found" });
         }
@@ -124,7 +124,7 @@ exports.resendOTP = async (req, res) => {
         const otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
         const accountVerification = false;
         const updated = await User.findOneAndUpdate(
-            { _id: id },
+            { _id: user._id },
             { otp, otpExpiration, accountVerification },
             { new: true }
         );
@@ -233,8 +233,14 @@ exports.updateCase = async (req, res) => {
 };
 exports.getCase = async (req, res) => {
     try {
-        if (req.query.lawyer != (null || undefined)) {
-            const data = await caseModel.find({ lawyer: req.query.lawyer });
+        if (req.Params.lawyer != (null || undefined)) {
+            const data = await caseModel.find({ lawyer: req.Params.lawyer });
+            if (!data || data.length === 0) {
+                return res.status(400).send({ msg: "not found" });
+            }
+            res.status(200).send({ data: data });
+        } if (req.Params.caseStatus != (null || undefined)) {
+            const data = await caseModel.find({ caseStatus: req.Params.caseStatus });
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
@@ -246,6 +252,37 @@ exports.getCase = async (req, res) => {
             }
             res.status(200).send({ data: data });
         }
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
+exports.upcommingCase = async (req, res) => {
+    try {
+        let date = new Date(Date.now()).getDate();
+        let month = new Date(Date.now()).getMonth() + 1;
+        let year = new Date(Date.now()).getFullYear();
+        let month1, date1;
+        if (month < 10) {
+            month1 = '' + 0 + month;
+        } else {
+            month1 = month
+        }
+        if (date < 10) {
+            date1 = '' + 0 + date;
+        }
+        else {
+            date1 = date
+        }
+        let fullDate = (`${year}-${month1}-${date1}`).toString()
+        const data = await caseModel.find({ lawyer: req.Params.lawyer, hearingDate: { $gte: ISODate(fullDate) } });
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
         res.status(500).send({

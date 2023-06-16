@@ -13,6 +13,7 @@ module.exports = (app) => {
     app.put("/api/v1/lawyer/update", [authJwt.verifyToken], auth.update);
     app.post("/api/v1/lawyer/case/add", [authJwt.verifyToken], auth.createCase);
     app.get("/api/v1/lawyer/case/all", auth.getCase);
+    app.get("/api/v1/lawyer/case/all/:lawyer", auth.upcommingCase);
     app.get("/api/v1/lawyer/case/get/:id", auth.getIdCase);
     app.delete("/api/v1/lawyer/case/delete/:id", auth.deleteCase);
     app.put("/api/v1/lawyer/case/update/:id", [authJwt.verifyToken], auth.updateCase);
