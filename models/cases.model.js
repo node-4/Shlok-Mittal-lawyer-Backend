@@ -23,7 +23,7 @@ const casesSchema = mongoose.Schema({
     judge: {
         type: String,
     },
-    caseStatus:{
+    caseStatus: {
         type: String,
     },
     nextHearingDate: {
@@ -31,6 +31,27 @@ const casesSchema = mongoose.Schema({
     },
     lastDateOfHearing: {
         type: Date,
+    },
+    setRemainder: {
+        type: Boolean,
+        default: false
+    },
+    hearingDate: {
+        type: Date,
+    },
+    hearingTime: {
+        type: String,
+    },
+    remainderType: {
+        type: String,
+        enum: ["Daily", "Hourly", "Weekly", "Monthly"],
+    },
+    remainderTime: {
+        type: String,
+    },
+    type: {
+        type: String,
+        enum: ["General", "Urgent"],
     },
 });
 const cases = mongoose.model("cases", casesSchema);
