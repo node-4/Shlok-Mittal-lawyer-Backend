@@ -8,6 +8,7 @@ const skillExpertise = require("../models/skillExpertise.model");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../configs/auth.config");
 var newOTP = require("otp-generators");
+const rating = require("../models/rating.model");
 exports.registration = async (req, res) => {
     const { phone, email } = req.body;
     try {
@@ -107,6 +108,18 @@ exports.verifyOtp = async (req, res) => {
     } catch (err) {
         console.log(err.message);
         res.status(500).send({ error: "internal server error" + err.message });
+    }
+};
+exports.getProfile = async (req, res) => {
+    try {
+        const usersDocument = await userModel.findOne({ userId: req.user.id, });
+        if (usersDocument) {
+            return res.status(200).json({ message: "get Profile", data: update });
+        } else {
+            return res.status(404).json({ message: "No data found", data: {} });
+        }
+    } catch (error) {
+        res.status(501).send({message: "server error.",data: {},});
     }
 };
 exports.resendOTP = async (req, res) => {
@@ -429,6 +442,21 @@ exports.createBill = async (req, res) => {
 exports.getAllbill = async (req, res) => {
     try {
         const data = await billModel.find({ lawyerId: req.user.id });
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
+exports.getAllRating = async (req, res) => {
+    try {
+        const data = await rating.find({ lawyerId: req.user.id }).populate('userId');
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }

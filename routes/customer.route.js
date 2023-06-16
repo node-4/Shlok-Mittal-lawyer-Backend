@@ -11,10 +11,13 @@ module.exports = (app) => {
     app.put("/api/v1/customer/resetPassword/:id", auth.resetPassword);
     app.get("/api/v1/customer/allLawyer", auth.getLawyers);
     app.put("/api/v1/customer/update",  [authJwt.verifyToken], auth.update);
+    app.get("/api/v1/customer/getProfile",  [authJwt.verifyToken], auth.getProfile);
     app.post("/api/v1/customer/saveDocument/:id",  [authJwt.verifyToken], auth.SaveDocument);
+    app.get("/api/v1/customer/getSaveDocument",  [authJwt.verifyToken], auth.getSaveDocument);
     app.post("/api/v1/customer/createAppointment/:id",  [authJwt.verifyToken], auth.createAppointment);
     app.get("/api/v1/customer/pastAppointment",  [authJwt.verifyToken], auth.pastAppointment);
     app.get("/api/v1/customer/cancelAppointment",  [authJwt.verifyToken], auth.cancelAppointment);
     app.get("/api/v1/customer/upcomingAppointment",  [authJwt.verifyToken], auth.upcomingAppointment);
     app.get("/api/v1/customer/Bill/all",  [authJwt.verifyToken],auth.getAllbill);
+    app.post("/api/v1/customer/giveRating/:id",  [authJwt.verifyToken], auth.giveRating);
 };

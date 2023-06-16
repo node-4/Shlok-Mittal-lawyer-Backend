@@ -14,7 +14,7 @@ var userSchema = new schema(
         languageKnow: {
             type: String,
         },
-        image:{
+        image: {
             type: String,
         },
         phone: {
@@ -77,6 +77,9 @@ var userSchema = new schema(
         blogNotification: {
             type: Boolean,
             default: false,
+        },
+        kyc: {
+            type: String,
         },
         userType: {
             type: String,

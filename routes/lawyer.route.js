@@ -10,7 +10,8 @@ module.exports = (app) => {
     app.post("/api/v1/lawyer/:id", auth.verifyOtp);
     app.post("/api/v1/lawyer/resendotp/:id", auth.resendOTP);
     app.put("/api/v1/lawyer/resetPassword", auth.resetPassword);
-    app.put("/api/v1/lawyer/update", [authJwt.verifyToken], auth.update);
+    app.put("/api/v1/lawyer/update", [authJwt.verifyToken], auth.update);  
+    app.get("/api/v1/lawyer/getProfile", [authJwt.verifyToken], auth.getProfile);  
     app.post("/api/v1/lawyer/case/add", [authJwt.verifyToken], auth.createCase);
     app.get("/api/v1/lawyer/case/all", auth.getCase);
     app.get("/api/v1/lawyer/case/all/:lawyer", auth.upcommingCase);
@@ -25,5 +26,6 @@ module.exports = (app) => {
     app.get("/api/v1/wallet/getWallet", [authJwt.verifyToken], wallet.getWallet);
     app.post("/api/v1/lawyer/createBill/:userId", [authJwt.verifyToken], auth.createBill);
     app.get("/api/v1/lawyer/Bill/all",  [authJwt.verifyToken],auth.getAllbill);
+    app.get("/api/v1/lawyer/rating/all",  [authJwt.verifyToken],auth.getAllRating);
 
 };

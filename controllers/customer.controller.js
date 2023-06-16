@@ -3,9 +3,11 @@ const User = require("../models/user.model");
 const userDocuments = require("../models/document");
 const saveDocuments = require("../models/saveDocument");
 const appointment = require("../models/appointment.model");
+const rating = require("../models/rating.model");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../configs/auth.config");
 var newOTP = require("otp-generators");
+const userModel = require("../models/user.model");
 
 exports.registration = async (req, res) => {
     const { phone, email } = req.body;
@@ -76,6 +78,18 @@ exports.signin = async (req, res) => {
         res.status(500).send({ message: "Server error" + error.message });
     }
 };
+exports.getProfile = async (req, res) => {
+    try {
+        const usersDocument = await userModel.findOne({ userId: req.user.id, });
+        if (usersDocument) {
+            return res.status(200).json({ message: "get Profile", data: update });
+        } else {
+            return res.status(404).json({ message: "No data found", data: {} });
+        }
+    } catch (error) {
+        res.status(501).send({message: "server error.",data: {},});
+    }
+};
 exports.verifyOtp = async (req, res) => {
     try {
         const { otp } = req.body;
@@ -90,7 +104,7 @@ exports.verifyOtp = async (req, res) => {
         userObj = {
             accountVerification: true
         }
-        const updated = await User.findByIdAndUpdate({ _id: user._id },userObj,{ new: true });
+        const updated = await User.findByIdAndUpdate({ _id: user._id }, userObj, { new: true });
         const accessToken = jwt.sign({ id: user._id }, authConfig.secret, {
             expiresIn: authConfig.accessTokenTime,
         });
@@ -249,6 +263,21 @@ exports.SaveDocument = async (req, res) => {
         });
     }
 };
+exports.getSaveDocument = async (req, res) => {
+    try {
+        const usersDocument = await saveDocuments.find({ userId: req.user.id }).populate('documents');
+        if (usersDocument.length === 0) {
+            return res.status(404).json({ message: "save Document not found" });
+        }
+        return res.status(200).json(usersDocument);
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).json({
+            message: "server error while getting lawyer",
+            error: err.message,
+        });
+    }
+};
 exports.createAppointment = async (req, res) => {
     try {
         const findUser = await User.findById({ _id: req.params.id });
@@ -316,6 +345,29 @@ exports.getAllbill = async (req, res) => {
         res.status(500).send({
             msg: "internal server error ",
             error: err.message,
+        });
+    }
+};
+exports.giveRating = async (req, res) => {
+    try {
+        const findUser = await User.findById({ _id: req.params.id });
+        if (findUser) {
+            let data = {
+                userId: req.user.id,
+                lawyerId: req.params.id,
+                rating: req.body.rating,
+                comment: req.body.comment,
+                date: Date.now(),
+            };
+            const Data = await rating.create(data);
+            return res.status(200).json(Data);
+        } else {
+            res.status(404).send({ message: "Document not found.", data: {} });
+        }
+    } catch (error) {
+        res.status(501).send({
+            message: "server error.",
+            data: {},
         });
     }
 };
