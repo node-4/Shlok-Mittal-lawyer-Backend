@@ -112,9 +112,9 @@ exports.verifyOtp = async (req, res) => {
 };
 exports.getProfile = async (req, res) => {
     try {
-        const usersDocument = await userModel.findOne({ userId: req.user.id, });
-        if (usersDocument) {
-            return res.status(200).json({ message: "get Profile", data: update });
+        const data = await userModel.findOne({ _id: req.user.id, });
+        if (data) {
+            return res.status(200).json({ message: "get Profile", data: data });
         } else {
             return res.status(404).json({ message: "No data found", data: {} });
         }
