@@ -331,9 +331,11 @@ exports.upcommingCase = async (req, res) => {
             date1 = date
         }
         let fullDate = (`${year}-${month1}-${date1}`).toString()
-        const data = await caseModel.find({ lawyer: req.user.id, hearingDate: { $gte: ISODate(fullDate) } }).populate('userId');
+        const d = new Date(fullDate);
+        let text = d.toISOString();
+        const data = await caseModel.find({ lawyer: req.user.id, hearingDate: { $gte: text } }).populate('userId');
         if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
+            return res.status(400).send({ status: 404,msg: "not found" });
         }
         res.status(200).send({ data: data });
     } catch (err) {
