@@ -42,6 +42,13 @@ const casesSchema = mongoose.Schema({
     hearingTime: {
         type: String,
     },
+    notes: {
+        type: Array,
+    },
+    hearing: {
+        type: Number,
+        default: 1
+    },
     remainderType: {
         type: String,
         enum: ["Daily", "Hourly", "Weekly", "Monthly"],

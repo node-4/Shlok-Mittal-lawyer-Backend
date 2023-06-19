@@ -119,7 +119,7 @@ exports.getProfile = async (req, res) => {
             return res.status(404).json({ message: "No data found", data: {} });
         }
     } catch (error) {
-        res.status(501).send({message: "server error.",data: {},});
+        res.status(501).send({ message: "server error.", data: {}, });
     }
 };
 exports.resendOTP = async (req, res) => {
@@ -201,6 +201,31 @@ exports.update = async (req, res) => {
             user.password = bcrypt.hashSync(password, 8) || user.password;
         }
         const updated = await user.save();
+        res.status(200).send({ message: "updated", data: updated });
+    } catch (err) {
+        console.log(err);
+        res.status(500).send({ message: "internal server error " + err.message, });
+    }
+};
+exports.updateProfile = async (req, res) => {
+    try {
+        const {name,email,phone,password,kyc,whatAppNotification,image,blogNotification,} = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).send({ message: "not found" });
+        }
+        user.name = name || user.name;
+        user.email = email || user.email;
+        user.phone = phone || user.phone;
+        user.image = image || user.image;
+        user.kyc = kyc || user.kyc;
+        user.whatAppNotification =
+            whatAppNotification || user.whatAppNotification;
+        user.blogNotification = blogNotification || user.blogNotification;
+        if (req.body.password) {
+            user.password = bcrypt.hashSync(password, 8) || user.password;
+        }
+        const updated = await user.save();
         // console.log(updated);
         res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
@@ -217,25 +242,46 @@ exports.createCase = async (req, res) => {
         res.status(200).send({ msg: "Cases added", data: result });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
+        res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.updateCase = async (req, res) => {
     try {
-        const data = await caseModel.findByIdAndUpdate(
+        const data = await caseModel.findById(req.params.id);
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        req.body.hearing = data.hearing + 1;
+        const update = await caseModel.findByIdAndUpdate(
             req.params.id,
             req.body,
             {
                 new: true,
             }
         );
-        if (!data) {
+        if (!update) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "updated", data: data });
+        res.status(200).send({ msg: "updated", data: update });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
+exports.addNote = async (req, res) => {
+    try {
+        const data = await caseModel.findById(req.params.id);
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        const update = await caseModel.findByIdAndUpdate(req.params.id, { $push: { notes: req.body.note } }, { new: true, });
+        if (!update) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ msg: "updated", data: update });
     } catch (err) {
         console.log(err.message);
         res.status(500).send({
@@ -246,20 +292,14 @@ exports.updateCase = async (req, res) => {
 };
 exports.getCase = async (req, res) => {
     try {
-        if (req.Params.lawyer != (null || undefined)) {
-            const data = await caseModel.find({ lawyer: req.Params.lawyer });
-            if (!data || data.length === 0) {
-                return res.status(400).send({ msg: "not found" });
-            }
-            res.status(200).send({ data: data });
-        } if (req.Params.caseStatus != (null || undefined)) {
-            const data = await caseModel.find({ caseStatus: req.Params.caseStatus });
+        if (req.Params.caseStatus) {
+            const data = await caseModel.find({ lawyer: req.user.id, caseStatus: req.Params.caseStatus });
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
             res.status(200).send({ data: data });
         } else {
-            const data = await caseModel.find();
+            const data = await caseModel.find({ lawyer: req.user.id });
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
@@ -291,7 +331,7 @@ exports.upcommingCase = async (req, res) => {
             date1 = date
         }
         let fullDate = (`${year}-${month1}-${date1}`).toString()
-        const data = await caseModel.find({ lawyer: req.Params.lawyer, hearingDate: { $gte: ISODate(fullDate) } });
+        const data = await caseModel.find({ lawyer: req.user.id, hearingDate: { $gte: ISODate(fullDate) } }).populate('userId');
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -313,10 +353,7 @@ exports.getIdCase = async (req, res) => {
         res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
+        res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.deleteCase = async (req, res) => {
