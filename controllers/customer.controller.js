@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const authConfig = require("../configs/auth.config");
 var newOTP = require("otp-generators");
 const userModel = require("../models/user.model");
+const caseModel = require("../models/cases.model");
 
 exports.registration = async (req, res) => {
     const { phone, email } = req.body;
@@ -19,6 +20,7 @@ exports.registration = async (req, res) => {
         if (!user) {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
             req.body.userType = "CUSTOMER";
+            req.body.refferalCode = await reffralCode();
             const userCreate = await User.create(req.body);
             res.status(200).send({
                 message: "registered successfully ",
@@ -80,14 +82,14 @@ exports.signin = async (req, res) => {
 };
 exports.getProfile = async (req, res) => {
     try {
-        const usersDocument = await userModel.findOne({ userId: req.user.id, });
+        const usersDocument = await userModel.findOne({ _id: req.user.id, });
         if (usersDocument) {
-            return res.status(200).json({ message: "get Profile", data: update });
+            return res.status(200).json({ message: "get Profile", data: usersDocument });
         } else {
             return res.status(404).json({ message: "No data found", data: {} });
         }
     } catch (error) {
-        res.status(501).send({message: "server error.",data: {},});
+        res.status(501).send({ message: "server error.", data: {}, });
     }
 };
 exports.verifyOtp = async (req, res) => {
@@ -285,7 +287,7 @@ exports.createAppointment = async (req, res) => {
             let data = {
                 userId: req.user.id,
                 lawyer: req.params.id,
-                appointmentDate: req.body.date,
+                appointmentDate: req.body.appointmentDate,
                 appointmentType: req.body.appointmentType
             };
             const Data = await appointment.create(data);
@@ -294,6 +296,28 @@ exports.createAppointment = async (req, res) => {
             res.status(404).send({ message: "Document not found.", data: {} });
         }
     } catch (error) {
+        console.log(error);
+        res.status(501).send({
+            message: "server error.",
+            data: {},
+        });
+    }
+};
+exports.cancelAppointment = async (req, res) => {
+    try {
+        const findUser = await User.findById({ _id: req.params.id });
+        if (findUser) {
+            const FindAppointment = await appointment.findById({ _id: req.params.id });
+            if (FindAppointment) {
+                const Data = await appointment.findByIdAndUpdate({ _id: FindAppointment._id }, { $set: { appointmentStatus: "Cancel" } }, { new: true });
+                res.status(200).json({ message: "Cancel appointment", data: Data });
+            }
+            return res.status(200).json(Data);
+        } else {
+            res.status(404).send({ message: "Document not found.", data: {} });
+        }
+    } catch (error) {
+        console.log(error);
         res.status(501).send({
             message: "server error.",
             data: {},
@@ -302,16 +326,14 @@ exports.createAppointment = async (req, res) => {
 };
 exports.upcomingAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ userId: req.user.id, appointmentStatus: "Pending" });
-        res.status(200).json({ message: "All Document", data: FindAppointment });
+        const FindAppointment = await appointment.find({ userId: req.user.id, appointmentStatus: "Pending" }).populate('lawyer');
+        res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
     } catch (err) {
         console.log(err);
-        res.status(400).json({
-            message: err.message,
-        });
+        res.status(400).json({ message: err.message, });
     }
 };
-exports.cancelAppointment = async (req, res) => {
+exports.allCancelAppointment = async (req, res) => {
     try {
         const FindAppointment = await appointment.find({ userId: req.user.id, appointmentStatus: "Cancel" });
         res.status(200).json({ message: "All Document", data: FindAppointment });
@@ -371,3 +393,38 @@ exports.giveRating = async (req, res) => {
         });
     }
 };
+exports.getCase = async (req, res) => {
+    try {
+        const data = await caseModel.find({ userId: req.user.id });
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
+exports.getrefferalCode = async (req, res) => {
+    try {
+        const usersDocument = await userModel.findOne({ _id: req.user.id, });
+        if (usersDocument) {
+            return res.status(200).json({ message: "get Profile", data: usersDocument.refferalCode });
+        } else {
+            return res.status(404).json({ message: "No data found", data: {} });
+        }
+    } catch (error) {
+        res.status(501).send({ message: "server error.", data: {}, });
+    }
+};
+const reffralCode = async () => {
+    var digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let OTP = '';
+    for (let i = 0; i < 9; i++) {
+        OTP += digits[Math.floor(Math.random() * 36)];
+    }
+    return OTP;
+}

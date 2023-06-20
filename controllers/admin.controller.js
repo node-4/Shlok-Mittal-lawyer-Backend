@@ -16,6 +16,7 @@ const Location = require("../models/location.model");
 const banner = require('../models/banner.model');
 const CourtCategory = require("../models/courtCategory.model");
 const Court = require("../models/court.model");
+const ContactDetail = require("../models/ContactDetail");
 exports.registration = async (req, res) => {
     const { phone, email } = req.body;
     try {
@@ -131,19 +132,10 @@ exports.getUsers = async (req, res) => {
 };
 exports.createCategory = async (req, res) => {
     try {
-        const category = {
-            userId: req.user._id,
-            name: req.body.name,
-            image: req.body.image,
-        };
+        const category = { name: req.body.name, image: req.body.image, };
         const categoryCreated = await Category.create(category);
-        console.log(
-            `#### Category add successfully #### /n ${categoryCreated} `
-        );
-        res.status(201).send({
-            message: "Category add successfully",
-            data: categoryCreated,
-        });
+        console.log(`#### Category add successfully #### /n ${categoryCreated} `);
+        res.status(201).send({ message: "Category add successfully", data: categoryCreated, });
     } catch (err) {
         console.log("#### error while Category create #### ", err.message);
         res.status(500).send({
@@ -153,20 +145,14 @@ exports.createCategory = async (req, res) => {
 };
 exports.getCategory = async (req, res) => {
     try {
-        const data = await Category.find().populate({
-            path: "userId",
-            select: "name",
-        });
+        const data = await Category.find();
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        res.status(200).send({ status: 200, message: "Data found", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
+        res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.getCategoryId = async (req, res) => {
@@ -186,19 +172,14 @@ exports.getCategoryId = async (req, res) => {
 };
 exports.updateCategory = async (req, res) => {
     try {
-        const data = await Category.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-        });
+        const data = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true, });
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
         res.status(200).send({ msg: "updated", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
+        res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.deleteCategory = async (req, res) => {
@@ -596,7 +577,7 @@ exports.DeleteBanner = async (req, res) => {
         const Banner = await banner.findByIdAndDelete({ _id: req.params.id });
         res.status(200).json({
             message: "Delete Banner ",
-        },)
+        })
     } catch (err) {
         res.status(400).json({
             message: err.message
@@ -921,5 +902,43 @@ exports.deleteCourt = async (req, res) => {
             msg: "internal server error",
             error: err.message,
         });
+    }
+};
+exports.addContactDetails = async (req, res) => {
+    try {
+        let findContact = await ContactDetail.findOne();
+        if (findContact) {
+            req.body.mobileNumber = req.body.mobileNumber || findContact.mobileNumber;
+            req.body.mobileNumberDescription = req.body.mobileNumberDescription || findContact.mobileNumberDescription;
+            req.body.email = req.body.email || findContact.email;
+            req.body.emailDescription = req.body.emailDescription || findContact.emailDescription;
+            req.body.whatAppchat = req.body.whatAppchat || findContact.whatAppchat;
+            req.body.whatAppchatDescription = req.body.whatAppchatDescription || findContact.whatAppchatDescription;
+            let updateContact = await ContactDetail.findByIdAndUpdate({ _id: findContact._id }, { $set: req.body }, { new: true });
+            if (updateContact) {
+                res.status(200).send({ status: 200, message: "Contact Detail update successfully", data: updateContact });
+            }
+        } else {
+            let result2 = await ContactDetail.create(req.body);
+            if (result2) {
+                res.status(200).send({ status: 200, message: "Contact Detail update successfully", data: result2 });
+            }
+        }
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({ status: 500, msg: "internal server error", error: err.message, });
+    }
+};
+exports.viewContactDetails = async (req, res) => {
+    try {
+        let findcontactDetails = await ContactDetail.findOne();
+        if (!findcontactDetails) {
+            res.status(404).send({ status: 404, message: "Contact Detail not found.", data: {} });
+        } else {
+            res.status(200).send({ status: 200, message: "Contact Detail fetch successfully", data: findcontactDetails });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).send({ status: 500, msg: "internal server error", error: err.message, });
     }
 };

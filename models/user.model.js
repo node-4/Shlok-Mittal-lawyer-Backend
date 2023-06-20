@@ -27,6 +27,9 @@ var userSchema = new schema(
         password: {
             type: String,
         },
+        refferalCode: {
+            type: String,
+        },
         firstLineAddress: {
             type: String,
         },
@@ -106,6 +109,9 @@ var userSchema = new schema(
         },
         languages: {
             type: String,
+        },
+        rating: {
+            type: Number,
         },
         wallet: {
             type: Number,

@@ -1,5 +1,6 @@
 const { validateUser } = require("../middlewares");
 const auth = require("../controllers/customer.controller");
+const wallet = require("../controllers/wallet.controller");
 const { authJwt, authorizeRoles } = require("../middlewares");
 
 module.exports = (app) => {
@@ -15,9 +16,18 @@ module.exports = (app) => {
     app.post("/api/v1/customer/saveDocument/:id",  [authJwt.verifyToken], auth.SaveDocument);
     app.get("/api/v1/customer/getSaveDocument",  [authJwt.verifyToken], auth.getSaveDocument);
     app.post("/api/v1/customer/createAppointment/:id",  [authJwt.verifyToken], auth.createAppointment);
+    app.post("/api/v1/customer/cancelAppointment/:id",  [authJwt.verifyToken], auth.cancelAppointment);
     app.get("/api/v1/customer/pastAppointment",  [authJwt.verifyToken], auth.pastAppointment);
-    app.get("/api/v1/customer/cancelAppointment",  [authJwt.verifyToken], auth.cancelAppointment);
+    app.get("/api/v1/customer/allCancelAppointment",  [authJwt.verifyToken], auth.allCancelAppointment);
     app.get("/api/v1/customer/upcomingAppointment",  [authJwt.verifyToken], auth.upcomingAppointment);
     app.get("/api/v1/customer/Bill/all",  [authJwt.verifyToken],auth.getAllbill);
-    app.post("/api/v1/customer/giveRating/:id",  [authJwt.verifyToken], auth.giveRating);
+    app.post("/api/v1/customer/giveRating/:id",  [authJwt.verifyToken], auth.giveRating)
+    app.post("/api/v1/user/addMoney", [authJwt.verifyToken], wallet.addMoney);
+    app.post("/api/v1/user/removeMoney", [authJwt.verifyToken], wallet.removeMoney);
+    app.get("/api/v1/user/getWallet", [authJwt.verifyToken], wallet.getWallet);
+    app.get("/api/v1/user/allTransactionUser", [authJwt.verifyToken], wallet.allTransactionUser);
+    app.get("/api/v1/user/allcreditTransactionUser", [authJwt.verifyToken], wallet.allcreditTransactionUser);
+    app.get("/api/v1/user/allDebitTransactionUser", [authJwt.verifyToken], wallet.allDebitTransactionUser);
+    app.get("/api/v1/customer/getCase",  [authJwt.verifyToken], auth.getCase);
+    app.get("/api/v1/customer/getrefferalCode",  [authJwt.verifyToken], auth.getrefferalCode);
 };
