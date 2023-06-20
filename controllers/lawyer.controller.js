@@ -114,13 +114,14 @@ exports.verifyOtp = async (req, res) => {
 };
 exports.getProfile = async (req, res) => {
     try {
-        const data = await userModel.findOne({ _id: req.user.id, });
+        const data = await User.findOne({ _id: req.user.id, });
         if (data) {
             return res.status(200).json({ message: "get Profile", data: data });
         } else {
             return res.status(404).json({ message: "No data found", data: {} });
         }
     } catch (error) {
+        console.log(error);
         res.status(501).send({ message: "server error.", data: {}, });
     }
 };
@@ -535,7 +536,7 @@ exports.getAllRating = async (req, res) => {
 };
 exports.getrefferalCode = async (req, res) => {
     try {
-        const usersDocument = await userModel.findOne({ _id: req.user.id, });
+        const usersDocument = await User.findOne({ _id: req.user.id, });
         if (usersDocument) {
             return res.status(200).json({ message: "get Profile", data: usersDocument.refferalCode });
         } else {
