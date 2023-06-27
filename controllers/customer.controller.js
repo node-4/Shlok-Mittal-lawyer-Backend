@@ -382,11 +382,23 @@ exports.giveRating = async (req, res) => {
                 date: Date.now(),
             };
             const Data = await rating.create(data);
+            const allData = await rating.find({ lawyerId: req.params.id }).populate('userId');
+            if (!allData || allData.length === 0) {
+                return res.status(400).send({ msg: "not found" });
+            }
+            let avg = 0;
+            allData.forEach((rev) => {
+                avg += rev.rating;
+            });
+
+            let ratings = avg / allData.length;
+            await User.findByIdAndUpdate({ _id: findUser._id }, { $set: { rating: ratings } }, { new: true });
             return res.status(200).json(Data);
         } else {
             res.status(404).send({ message: "Document not found.", data: {} });
         }
     } catch (error) {
+        console.log(error);
         res.status(501).send({
             message: "server error.",
             data: {},

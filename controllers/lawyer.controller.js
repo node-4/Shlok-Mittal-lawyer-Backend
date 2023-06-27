@@ -114,9 +114,11 @@ exports.verifyOtp = async (req, res) => {
 };
 exports.getProfile = async (req, res) => {
     try {
-        const data = await User.findOne({ _id: req.user.id, });
+        console.log(req.user);
+        const data = await User.findOne({ _id: req.user._id, }).populate({ path: 'categoryId', select: "name" });
         if (data) {
-            return res.status(200).json({ message: "get Profile", data: data });
+            const data1 = await rating.find({ lawyerId: data._id }).populate({ path: 'userId', select: "fullName firstName lastName image" });
+            return res.status(200).json({ message: "get Profile", data: data, rating: data1 });
         } else {
             return res.status(404).json({ message: "No data found", data: {} });
         }
@@ -401,7 +403,7 @@ exports.deleteCase = async (req, res) => {
 };
 exports.skillExpertise = async (req, res) => {
     try {
-        let findSkill = await skillExpertise.findOne({ userId: req.user.id });
+        let findSkill = await User.findOne({ _id: req.user.id });
         if (findSkill) {
             res.status(200).send({ msg: "skill data found", data: findSkill });
         } else {
@@ -417,34 +419,23 @@ exports.skillExpertise = async (req, res) => {
 };
 exports.addskill = async (req, res) => {
     try {
-        let findSkill = await skillExpertise.findOne({ userId: req.user.id });
+        let findSkill = await User.findOne({ _id: req.user.id });
         if (findSkill) {
             let skill = [];
-            for (let i = 0; i < findSkill.skill.length; i++) {
-                skill.push(findSkill.skill[i]);
+            for (let i = 0; i < findSkill.skills.length; i++) {
+                let obj = {
+                    skill: findSkill.skills[i].skill,
+                };
+                skill.push(obj);
             }
             let obj = {
                 skill: req.body.skill,
             };
             skill.push(obj);
-            const data = await skillExpertise.findOneAndUpdate(
-                { userId: req.user.id },
-                { $set: { skill: skill } },
-                { new: true }
-            );
+            const data = await User.findOneAndUpdate({ _id: req.user.id }, { $set: { skills: skill } }, { new: true });
             res.status(200).send({ msg: "skill added", data: data });
         } else {
-            let skill = [];
-            let obj = {
-                skill: req.body.skill,
-            };
-            skill.push(obj);
-            let obj1 = {
-                userId: req.user.id,
-                skill: skill,
-            };
-            const result = await skillExpertise.create(obj1);
-            res.status(200).send({ msg: "skill added", data: result });
+            return res.status(404).send({ msg: "not found" });
         }
     } catch (err) {
         console.log(err.message);
@@ -454,36 +445,26 @@ exports.addskill = async (req, res) => {
         });
     }
 };
+
 exports.addExpertise = async (req, res) => {
     try {
-        let findSkill = await skillExpertise.findOne({ userId: req.user.id });
+        let findSkill = await User.findOne({ _id: req.user.id });
         if (findSkill) {
             let expertise = [];
-            for (let i = 0; i < findSkill.expertise.length; i++) {
-                expertise.push(findSkill.expertise[i]);
+            for (let i = 0; i < findSkill.expertises.length; i++) {
+                let obj = {
+                    expertise: findSkill.expertises[i].expertise,
+                };
+                expertise.push(obj);
             }
             let obj = {
                 expertise: req.body.expertise,
             };
             expertise.push(obj);
-            const data = await skillExpertise.findOneAndUpdate(
-                { userId: req.user.id },
-                { $set: { expertise: expertise } },
-                { new: true }
-            );
-            res.status(200).send({ msg: "Expertise added", data: data });
+            const data = await User.findOneAndUpdate({ _id: req.user.id }, { $set: { expertises: expertise } }, { new: true });
+            res.status(200).send({ msg: "skill added", data: data });
         } else {
-            let expertise = [];
-            let obj = {
-                expertise: req.body.expertise,
-            };
-            expertise.push(obj);
-            let obj1 = {
-                userId: req.user.id,
-                expertise: expertise,
-            };
-            const result = await skillExpertise.create(obj1);
-            res.status(200).send({ msg: "Expertise added", data: result });
+            return res.status(404).send({ msg: "not found" });
         }
     } catch (err) {
         console.log(err.message);
