@@ -36,7 +36,7 @@ const casesSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    hearingDate: {
+    remainderDate: {
         type: Date,
     },
     hearingTime: {

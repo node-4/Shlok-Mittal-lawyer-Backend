@@ -5,7 +5,6 @@ const saveDocuments = require("../models/saveDocument");
 const caseModel = require("../models/cases.model");
 const appointment = require("../models/appointment.model");
 const billModel = require("../models/bill.model");
-const skillExpertise = require("../models/skillExpertise.model");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../configs/auth.config");
 var newOTP = require("otp-generators");
@@ -14,19 +13,19 @@ exports.registration = async (req, res) => {
     const { phone, email } = req.body;
     try {
         req.body.email = email.split(" ").join("").toLowerCase();
-        let user = await User.findOne({
-            $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }],
-            userType: "LAWYER",
-        });
+        let user = await User.findOne({ $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }], userType: "LAWYER", });
         if (!user) {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
             req.body.userType = "LAWYER";
             req.body.refferalCode = await reffralCode();
+            let barRegist = req.files['barRegistrationImage'];
+            let barCert = req.files['barCertificateImage'];
+            let aad = req.files['aadhar'];
+            req.body.barRegistrationImage = barRegist[0].path;
+            req.body.barCertificateImage = barCert[0].path;
+            req.body.aadhar = aad[0].path;
             const userCreate = await User.create(req.body);
-            res.status(200).send({
-                message: "registered successfully ",
-                data: userCreate,
-            });
+            res.status(200).send({ message: "registered successfully ", data: userCreate, });
         } else {
             res.status(409).send({ message: "Already Exist", data: [] });
         }
@@ -179,31 +178,24 @@ exports.resetPassword = async (req, res) => {
 };
 exports.update = async (req, res) => {
     try {
-        const {
-            fullName,
-            email,
-            phone,
-            password,
-            bio,
-            hearingFee,
-            image,
-            experiance,
-            languages,
-        } = req.body;
+        const { fullName, email, phone, password, bio, hearingFee, languages, } = req.body;
         const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
         }
+        let fileUrl;
+        if (req.file) {
+            fileUrl = req.file ? req.file.path : "";
+        }
         user.fullName = fullName || user.fullName;
         user.email = email || user.email;
         user.phone = phone || user.phone;
-        user.image = image || user.image;
+        user.image = fileUrl || user.image;
         user.bio = bio || user.bio;
         user.hearingFee = hearingFee || user.hearingFee;
-        user.experiance = experiance || user.experiance;
         user.languages = languages || user.languages;
         if (req.body.password) {
-            user.password = bcrypt.hashSync(password, 8) || user.password;
+            user.password = bcrypt.hashSync(req.body.password, 8) || user.password;
         }
         const updated = await user.save();
         res.status(200).send({ message: "updated", data: updated });
@@ -445,7 +437,6 @@ exports.addskill = async (req, res) => {
         });
     }
 };
-
 exports.addExpertise = async (req, res) => {
     try {
         let findSkill = await User.findOne({ _id: req.user.id });

@@ -4,7 +4,6 @@ const userDocuments = require("../models/document");
 const saveDocuments = require("../models/saveDocument");
 const caseModel = require("../models/cases.model");
 const billModel = require("../models/bill.model");
-const skillExpertise = require("../models/skillExpertise.model");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../configs/auth.config");
 var newOTP = require("otp-generators");

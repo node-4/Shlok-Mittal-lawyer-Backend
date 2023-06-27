@@ -137,6 +137,10 @@ var userSchema = new schema(
             type: Number,
             default: 0,
         },
+        minofconsultance: {
+            type: Number,
+            default: 0,
+        },
         experiance: {
             type: String,
             default: "",

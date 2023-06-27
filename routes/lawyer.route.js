@@ -2,15 +2,35 @@ const { validateUser } = require("../middlewares");
 const auth = require("../controllers/lawyer.controller");
 const wallet = require("../controllers/wallet.controller");
 const { authJwt, authorizeRoles } = require("../middlewares");
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
+cloudinary.config({
+    cloud_name: "dbrvq9uxa",
+    api_key: "567113285751718",
+    api_secret: "rjTsz9ksqzlDtsrlOPcTs_-QtW4",
+});
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "images/image",
+        allowed_formats: ["jpg", "jpeg", "png", "PNG", "xlsx", "xls", "pdf", "PDF"],
+    },
+});
+const upload = multer({ storage: storage });
+var cpUpload = upload.fields([{ name: 'barRegistrationImage', maxCount: 1 },
+ { name: 'barCertificateImage', maxCount: 1 }, 
+ { name: 'aadhar', maxCount: 1 }]);
+
 
 module.exports = (app) => {
-    app.post("/api/v1/lawyer/registration", auth.registration);
+    app.post("/api/v1/lawyer/registration",cpUpload, auth.registration);
     app.post("/api/v1/lawyer/login", auth.loginWithPhone);
     app.post("/api/v1/lawyer/signin", [validateUser.signInBody], auth.signin);
     app.post("/api/v1/lawyer/:id", auth.verifyOtp);
     app.post("/api/v1/lawyer/resendotp/:id", auth.resendOTP);
     app.put("/api/v1/lawyer/resetPassword", auth.resetPassword);
-    app.put("/api/v1/lawyer/update", [authJwt.verifyToken], auth.update);
+    app.put("/api/v1/lawyer/update", [authJwt.verifyToken], upload.single("image"),auth.update);
     app.put("/api/v1/lawyer/updateProfile/:id", auth.updateProfile);
     app.get("/api/v1/lawyer/getProfile", [authJwt.verifyToken], auth.getProfile);
     app.post("/api/v1/lawyer/case/add", [authJwt.verifyToken], auth.createCase);
