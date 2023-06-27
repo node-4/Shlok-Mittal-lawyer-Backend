@@ -130,8 +130,12 @@ var userSchema = new schema(
             default: "",
         },
         hearingFee: {
-            type: String,
-            default: "",
+            type: Number,
+            default: 0,
+        },
+        consultancyCost: {
+            type: Number,
+            default: 0,
         },
         experiance: {
             type: String,
