@@ -42,9 +42,10 @@ const casesSchema = mongoose.Schema({
     hearingTime: {
         type: String,
     },
-    notes: {
-        type: Array,
-    },
+    notes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "document",
+    }],
     hearing: {
         type: Number,
         default: 1

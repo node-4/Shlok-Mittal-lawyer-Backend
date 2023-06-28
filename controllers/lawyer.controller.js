@@ -232,167 +232,6 @@ exports.updateProfile = async (req, res) => {
         });
     }
 };
-exports.createCase = async (req, res) => {
-    try {
-        req.body.lawyer = req.user.id;
-        const result = await caseModel.create(req.body);
-        res.status(200).send({ msg: "Cases added", data: result });
-    } catch (err) {
-        console.log(err.message);
-        res.status(500).send({ msg: "internal server error ", error: err.message, });
-    }
-};
-exports.updateCase = async (req, res) => {
-    try {
-        const data = await caseModel.findById(req.params.id);
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        req.body.hearing = data.hearing + 1;
-        const update = await caseModel.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-            }
-        );
-        if (!update) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        res.status(200).send({ msg: "updated", data: update });
-    } catch (err) {
-        console.log(err.message);
-        res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.addNote = async (req, res) => {
-    try {
-        const data = await caseModel.findById(req.params.id);
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        const update = await caseModel.findByIdAndUpdate(req.params.id, { $push: { notes: req.body.note } }, { new: true, });
-        if (!update) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        res.status(200).send({ msg: "updated", data: update });
-    } catch (err) {
-        console.log(err.message);
-        res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.getCase = async (req, res) => {
-    try {
-        const data = await caseModel.find({ lawyer: req.user.id }).populate('lawyer userId');
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        res.status(200).send({ data: data });
-    } catch (err) {
-        console.log(err.message);
-        res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.upcommingCase = async (req, res) => {
-    try {
-        let date = new Date(Date.now()).getDate();
-        let month = new Date(Date.now()).getMonth() + 1;
-        let year = new Date(Date.now()).getFullYear();
-        let month1, date1;
-        if (month < 10) {
-            month1 = '' + 0 + month;
-        } else {
-            month1 = month
-        }
-        if (date < 10) {
-            date1 = '' + 0 + date;
-        }
-        else {
-            date1 = date
-        }
-        let fullDate = (`${year}-${month1}-${date1}`).toString()
-        const d = new Date(fullDate);
-        let text = d.toISOString();
-        const data = await caseModel.find({ lawyer: req.user.id, hearingDate: { $gte: text } }).populate('userId lawyer');
-        if (!data || data.length === 0) {
-            return res.status(400).send({ status: 404, msg: "not found" });
-        }
-        res.status(200).send({ data: data });
-    } catch (err) {
-        console.log(err.message);
-        res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.upcomingAppointment = async (req, res) => {
-    try {
-        const FindAppointment = await appointment.find({ lawyer: req.user.id, appointmentStatus: "Pending" }).populate('lawyer userId');
-        res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
-    } catch (err) {
-        console.log(err);
-        res.status(400).json({ message: err.message, });
-    }
-};
-exports.allCancelAppointment = async (req, res) => {
-    try {
-        const FindAppointment = await appointment.find({ lawyer: req.user.id, appointmentStatus: "Cancel" }).populate('lawyer userId');
-        res.status(200).json({ message: "All Document", data: FindAppointment });
-    } catch (err) {
-        console.log(err);
-        res.status(400).json({
-            message: err.message,
-        });
-    }
-};
-exports.pastAppointment = async (req, res) => {
-    try {
-        const FindAppointment = await appointment.find({ lawyer: req.user.id, appointmentStatus: "Done" }).populate('lawyer userId');
-        res.status(200).json({ message: "All Document", data: FindAppointment });
-    } catch (err) {
-        console.log(err);
-        res.status(400).json({
-            message: err.message,
-        });
-    }
-};
-exports.getIdCase = async (req, res) => {
-    try {
-        const data = await caseModel.findById(req.params.id).populate('lawyer userId');
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        res.status(200).send({ data: data });
-    } catch (err) {
-        console.log(err.message);
-        res.status(500).send({ msg: "internal server error ", error: err.message, });
-    }
-};
-exports.deleteCase = async (req, res) => {
-    try {
-        const data = await caseModel.findByIdAndDelete(req.params.id);
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        res.status(200).send({ msg: "deleted", data: data });
-    } catch (err) {
-        console.log(err.message);
-        res.status(500).send({
-            msg: "internal server error",
-            error: err.message,
-        });
-    }
-};
 exports.skillExpertise = async (req, res) => {
     try {
         let findSkill = await User.findOne({ _id: req.user.id });
@@ -465,6 +304,152 @@ exports.addExpertise = async (req, res) => {
         });
     }
 };
+exports.createCase = async (req, res) => {
+    try {
+        req.body.lawyer = req.user.id;
+        const result = await caseModel.create(req.body);
+        res.status(200).send({ msg: "Cases added", data: result });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({ msg: "internal server error ", error: err.message, });
+    }
+};
+exports.updateCase = async (req, res) => {
+    try {
+        const data = await caseModel.findById(req.params.id);
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        req.body.hearing = data.hearing + 1;
+        const update = await caseModel.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            {
+                new: true,
+            }
+        );
+        if (!update) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ msg: "updated", data: update });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
+exports.getCase = async (req, res) => {
+    try {
+        const data = await caseModel.find({ lawyer: req.user.id }).populate('lawyer userId');
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
+exports.getIdCase = async (req, res) => {
+    try {
+        const data = await caseModel.findById(req.params.id).populate('lawyer userId notes');
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({ msg: "internal server error ", error: err.message, });
+    }
+};
+exports.createAppointment = async (req, res) => {
+    try {
+        const findUser = await User.findById({ _id: req.user._id });
+        if (findUser) {
+            let data = {
+                lawyer: req.user._id,
+                userId: req.body.userId,
+                case: req.body.caseId,
+                appointmentDate: req.body.appointmentDate,
+                appointmentType: req.body.appointmentType,
+                appointmentTime: req.body.appointmentTime
+            };
+            const Data = await appointment.create(data);
+            return res.status(200).json(Data);
+        } else {
+            res.status(404).send({ message: "Document not found.", data: {} });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(501).send({
+            message: "server error.",
+            data: {},
+        });
+    }
+};
+exports.upcomingAppointment = async (req, res) => {
+    try {
+        const FindAppointment = await appointment.find({ lawyer: req.user.id }).populate('lawyer userId case');
+        if (FindAppointment.length == 0) {
+            res.status(404).json({ message: "upcoming appointment not found", data: {}, status: 404 });
+        } else {
+            res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({ message: err.message, });
+    }
+};
+exports.allCancelAppointment = async (req, res) => {
+    try {
+        const FindAppointment = await appointment.find({ lawyer: req.user.id, appointmentStatus: "Cancel" }).populate('lawyer userId case');
+        if (FindAppointment.length == 0) {
+            res.status(404).json({ message: "Cancel appointment not found", data: {}, status: 404 });
+        } else {
+            res.status(200).json({ message: "All cancel Appointment", data: FindAppointment, status: 200 });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            message: err.message,
+        });
+    }
+};
+exports.pastAppointment = async (req, res) => {
+    try {
+        const FindAppointment = await appointment.find({ lawyer: req.user.id, appointmentStatus: "Done" }).populate('lawyer userId case');
+        if (FindAppointment.length == 0) {
+            res.status(404).json({ message: "Past appointment not found", data: {}, status: 404 });
+        } else {
+            res.status(200).json({ message: "All past appointment", data: FindAppointment });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            message: err.message,
+        });
+    }
+};
+exports.deleteCase = async (req, res) => {
+    try {
+        const data = await caseModel.findByIdAndDelete(req.params.id);
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ msg: "deleted", data: data });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error",
+            error: err.message,
+        });
+    }
+};
 exports.createBill = async (req, res) => {
     let findUser = await User.findById({ _id: req.params.userId });
     if (!findUser) {
@@ -481,6 +466,39 @@ exports.getAllbill = async (req, res) => {
         const data = await billModel.find({ lawyerId: req.user.id });
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
+exports.upcommingCase = async (req, res) => {
+    try {
+        let date = new Date(Date.now()).getDate();
+        let month = new Date(Date.now()).getMonth() + 1;
+        let year = new Date(Date.now()).getFullYear();
+        let month1, date1;
+        if (month < 10) {
+            month1 = '' + 0 + month;
+        } else {
+            month1 = month
+        }
+        if (date < 10) {
+            date1 = '' + 0 + date;
+        }
+        else {
+            date1 = date
+        }
+        let fullDate = (`${year}-${month1}-${date1}`).toString()
+        const d = new Date(fullDate);
+        let text = d.toISOString();
+        const data = await caseModel.find({ lawyer: req.user.id, hearingDate: { $gte: text } }).populate('userId lawyer');
+        if (!data || data.length === 0) {
+            return res.status(400).send({ status: 404, msg: "not found" });
         }
         res.status(200).send({ data: data });
     } catch (err) {

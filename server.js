@@ -19,7 +19,6 @@ app.get("/", (req, res) => {
     res.send("Hello World!");
 });
 require("./routes/customer.route")(app);
-require("./routes/document.route")(app);
 require("./routes/notification.route")(app);
 require("./routes/lawyer.route")(app);
 require("./routes/admin.route")(app);

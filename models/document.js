@@ -4,6 +4,14 @@ const documentSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
+    lawyerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
+    casesId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "cases",
+    },
     image: {
         type: String,
         require: true,

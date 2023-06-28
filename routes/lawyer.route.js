@@ -1,6 +1,7 @@
 const { validateUser } = require("../middlewares");
 const auth = require("../controllers/lawyer.controller");
 const wallet = require("../controllers/wallet.controller");
+const document = require("../controllers/documentController");
 const { authJwt, authorizeRoles } = require("../middlewares");
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -34,16 +35,17 @@ module.exports = (app) => {
     app.put("/api/v1/lawyer/updateProfile/:id", auth.updateProfile);
     app.get("/api/v1/lawyer/getProfile", [authJwt.verifyToken], auth.getProfile);
     app.post("/api/v1/lawyer/case/add", [authJwt.verifyToken], auth.createCase);
-    app.post("/api/v1/lawyer/case/addNote/:id", [authJwt.verifyToken], auth.addNote);
     app.get("/api/v1/lawyer/case/all", [authJwt.verifyToken], auth.getCase);
     app.get("/api/v1/lawyer/case/all/:caseStatus", [authJwt.verifyToken], auth.getCase);
-    app.get("/api/v1/lawyer/case/upcommingCase", [authJwt.verifyToken], auth.upcommingCase);
-    app.get("/api/v1/lawyer/pastAppointment",  [authJwt.verifyToken], auth.pastAppointment);
+    app.post("/api/v1/lawyer/Appointment/createAppointment", [authJwt.verifyToken], auth.createAppointment);
+    app.get("/api/v1/lawyer/Appointment/upcomingAppointment",  [authJwt.verifyToken], auth.upcomingAppointment);
     app.get("/api/v1/lawyer/allCancelAppointment",  [authJwt.verifyToken], auth.allCancelAppointment);
-    app.get("/api/v1/lawyer/upcomingAppointment",  [authJwt.verifyToken], auth.upcomingAppointment);
+    app.get("/api/v1/lawyer/pastAppointment",  [authJwt.verifyToken], auth.pastAppointment);
+    app.post("/api/v1/lawyer/document/add",[authJwt.verifyToken],document.AddDocument);
+    app.get("/api/v1/lawyer/document/all", [authJwt.verifyToken], document.getDocument);
+    app.get("/api/v1/lawyer/document/byCaseId/:caseId", [authJwt.verifyToken], document.getBycaseId);
+    app.get("/api/v1/lawyer/document/get/:id", document.getById);
     app.get("/api/v1/lawyer/case/get/:id", auth.getIdCase);
-    app.delete("/api/v1/lawyer/case/delete/:id", auth.deleteCase);
-    app.put("/api/v1/lawyer/case/update/:id", [authJwt.verifyToken], auth.updateCase);
     app.put("/api/v1/lawyer/addskill", [authJwt.verifyToken], auth.addskill);
     app.get("/api/v1/lawyer/skillExpertise", [authJwt.verifyToken], auth.skillExpertise);
     app.put("/api/v1/lawyer/addExpertise", [authJwt.verifyToken], auth.addExpertise);
@@ -53,6 +55,24 @@ module.exports = (app) => {
     app.get("/api/v1/lawyer/allTransactionUser", [authJwt.verifyToken], wallet.allTransactionUser);
     app.get("/api/v1/lawyer/allcreditTransactionUser", [authJwt.verifyToken], wallet.allcreditTransactionUser);
     app.get("/api/v1/lawyer/allDebitTransactionUser", [authJwt.verifyToken], wallet.allDebitTransactionUser);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    app.delete("/api/v1/lawyer/case/delete/:id", auth.deleteCase);
+    app.put("/api/v1/lawyer/case/update/:id", [authJwt.verifyToken], auth.updateCase);
     app.post("/api/v1/lawyer/createBill/:userId", [authJwt.verifyToken], auth.createBill);
     app.get("/api/v1/lawyer/Bill/all", [authJwt.verifyToken], auth.getAllbill);
     app.get("/api/v1/lawyer/rating/all", [authJwt.verifyToken], auth.getAllRating);
