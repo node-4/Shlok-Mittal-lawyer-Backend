@@ -282,7 +282,7 @@ exports.getSaveDocument = async (req, res) => {
 };
 exports.createAppointment = async (req, res) => {
     try {
-        const findUser = await User.findById({ _id: req.params.id });
+        const findUser = await User.findById({ _id: req.user.id });
         if (findUser) {
             let data = {
                 lawyer: req.body.lawyerId,

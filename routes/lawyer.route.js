@@ -55,7 +55,9 @@ module.exports = (app) => {
     app.get("/api/v1/lawyer/allTransactionUser", [authJwt.verifyToken], wallet.allTransactionUser);
     app.get("/api/v1/lawyer/allcreditTransactionUser", [authJwt.verifyToken], wallet.allcreditTransactionUser);
     app.get("/api/v1/lawyer/allDebitTransactionUser", [authJwt.verifyToken], wallet.allDebitTransactionUser);
-
+    app.post("/api/v1/lawyer/createBill/:userId", [authJwt.verifyToken], auth.createBill);
+    app.get("/api/v1/lawyer/Bill/all", [authJwt.verifyToken], auth.getAllbill);
+    app.get("/api/v1/lawyer/Client/all", [authJwt.verifyToken], auth.getAllClient);
 
 
 
@@ -73,8 +75,6 @@ module.exports = (app) => {
 
     app.delete("/api/v1/lawyer/case/delete/:id", auth.deleteCase);
     app.put("/api/v1/lawyer/case/update/:id", [authJwt.verifyToken], auth.updateCase);
-    app.post("/api/v1/lawyer/createBill/:userId", [authJwt.verifyToken], auth.createBill);
-    app.get("/api/v1/lawyer/Bill/all", [authJwt.verifyToken], auth.getAllbill);
     app.get("/api/v1/lawyer/rating/all", [authJwt.verifyToken], auth.getAllRating);
     app.get("/api/v1/lawyer/getrefferalCode",  [authJwt.verifyToken], auth.getrefferalCode);
 

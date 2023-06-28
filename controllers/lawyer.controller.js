@@ -4,6 +4,7 @@ const userDocuments = require("../models/document");
 const saveDocuments = require("../models/saveDocument");
 const caseModel = require("../models/cases.model");
 const appointment = require("../models/appointment.model");
+const clientModel = require("../models/clientModel");
 const billModel = require("../models/bill.model");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../configs/auth.config");
@@ -308,7 +309,24 @@ exports.createCase = async (req, res) => {
     try {
         req.body.lawyer = req.user.id;
         const result = await caseModel.create(req.body);
-        res.status(200).send({ msg: "Cases added", data: result });
+        if (result) {
+            let findClient = await clientModel.findOne({ lawyer: req.user.id });
+            if (findClient) {
+                if (findClient.clients.includes((result.userId).toString())) {
+                    res.status(200).send({ msg: "Cases added", data: result });
+                } else {
+                    let update = await clientModel.findByIdAndUpdate({ _id: findClient._id }, { $push: { clients: (result.userId).toString() } }, { new: true })
+                    res.status(200).send({ msg: "Cases added", data: result });
+                }
+            } else {
+                let obj = { lawyer: req.user.id };
+                const result1 = await clientModel.create(obj);
+                if (result1) {
+                    let update = await clientModel.findByIdAndUpdate({ _id: result1._id }, { $push: { clients: (result.userId).toString() } }, { new: true })
+                    res.status(200).send({ msg: "Cases added", data: result });
+                }
+            }
+        }
     } catch (err) {
         console.log(err.message);
         res.status(500).send({ msg: "internal server error ", error: err.message, });
@@ -534,6 +552,22 @@ exports.getrefferalCode = async (req, res) => {
         }
     } catch (error) {
         res.status(501).send({ message: "server error.", data: {}, });
+    }
+};
+
+exports.getAllClient = async (req, res) => {
+    try {
+        const data = await clientModel.find({ lawyer: req.user.id }).populate('clients');
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
     }
 };
 const reffralCode = async () => {
