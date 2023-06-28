@@ -285,10 +285,12 @@ exports.createAppointment = async (req, res) => {
         const findUser = await User.findById({ _id: req.params.id });
         if (findUser) {
             let data = {
+                lawyer: req.body.lawyerId,
                 userId: req.user.id,
-                lawyer: req.params.id,
+                case: req.body.caseId,
                 appointmentDate: req.body.appointmentDate,
-                appointmentType: req.body.appointmentType
+                appointmentType: req.body.appointmentType,
+                appointmentTime: req.body.appointmentTime
             };
             const Data = await appointment.create(data);
             return res.status(200).json(Data);
