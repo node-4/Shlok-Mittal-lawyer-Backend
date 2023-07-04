@@ -11,11 +11,12 @@ module.exports = (app) => {
     app.get("/api/v1/customer/resendotp/:id", auth.resendOTP);
     app.put("/api/v1/customer/resetPassword/:id", auth.resetPassword);
     app.get("/api/v1/customer/allLawyer", auth.getLawyers);
+    app.get("/api/v1/customer/getLawyersbyCategory/:categoryId", auth.getLawyersbyCategory);
     app.put("/api/v1/customer/update",  [authJwt.verifyToken], auth.update);
     app.get("/api/v1/customer/getProfile",  [authJwt.verifyToken], auth.getProfile);
     app.post("/api/v1/customer/saveDocument/:id",  [authJwt.verifyToken], auth.SaveDocument);
     app.get("/api/v1/customer/getSaveDocument",  [authJwt.verifyToken], auth.getSaveDocument);
-    app.post("/api/v1/customer/createAppointment/:id",  [authJwt.verifyToken], auth.createAppointment);
+    app.post("/api/v1/customer/createAppointment",  [authJwt.verifyToken], auth.createAppointment);
     app.post("/api/v1/customer/cancelAppointment/:id",  [authJwt.verifyToken], auth.cancelAppointment);
     app.get("/api/v1/customer/pastAppointment",  [authJwt.verifyToken], auth.pastAppointment);
     app.get("/api/v1/customer/allCancelAppointment",  [authJwt.verifyToken], auth.allCancelAppointment);
@@ -30,4 +31,5 @@ module.exports = (app) => {
     app.get("/api/v1/user/allDebitTransactionUser", [authJwt.verifyToken], wallet.allDebitTransactionUser);
     app.get("/api/v1/customer/getCase",  [authJwt.verifyToken], auth.getCase);
     app.get("/api/v1/customer/getrefferalCode",  [authJwt.verifyToken], auth.getrefferalCode);
+    app.get("/api/v1/customer/getmyLawyer",  [authJwt.verifyToken], auth.getAllLawyer);
 };

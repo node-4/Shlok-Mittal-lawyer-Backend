@@ -9,6 +9,7 @@ const authConfig = require("../configs/auth.config");
 var newOTP = require("otp-generators");
 const userModel = require("../models/user.model");
 const caseModel = require("../models/cases.model");
+const clientModel = require("../models/clientModel");
 
 exports.registration = async (req, res) => {
     const { phone, email } = req.body;
@@ -223,6 +224,21 @@ exports.getLawyers = async (req, res) => {
         });
     }
 };
+exports.getLawyersbyCategory = async (req, res) => {
+    try {
+        const findLawyer = await User.find({ categoryId: req.params.categoryId, userType: "LAWYER" }).populate('categoryId');
+        if (findLawyer.length === 0) {
+            return res.status(404).json({ message: "Lawyer not found" });
+        }
+        return res.status(200).json(findLawyer);
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).json({
+            message: "server error while getting lawyer",
+            error: err.message,
+        });
+    }
+};
 exports.SaveDocument = async (req, res) => {
     try {
         const findDocument = await userDocuments.findById({
@@ -307,7 +323,7 @@ exports.createAppointment = async (req, res) => {
 };
 exports.cancelAppointment = async (req, res) => {
     try {
-        const findUser = await User.findById({ _id: req.params.id });
+        const findUser = await User.findById({ _id: req.user.id });
         if (findUser) {
             const FindAppointment = await appointment.findById({ _id: req.params.id });
             if (FindAppointment) {
@@ -432,6 +448,21 @@ exports.getrefferalCode = async (req, res) => {
         }
     } catch (error) {
         res.status(501).send({ message: "server error.", data: {}, });
+    }
+};
+exports.getAllLawyer = async (req, res) => {
+    try {
+        const data = await clientModel.find({ clients: { $in: req.user.id } }).populate('lawyer');
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
     }
 };
 const reffralCode = async () => {
