@@ -180,7 +180,7 @@ exports.resetPassword = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const { fullName, email, phone, password, bio, hearingFee, languages, } = req.body;
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
         }
@@ -235,7 +235,7 @@ exports.updateProfile = async (req, res) => {
 };
 exports.skillExpertise = async (req, res) => {
     try {
-        let findSkill = await User.findOne({ _id: req.user.id });
+        let findSkill = await User.findOne({ _id: req.user._id });
         if (findSkill) {
             res.status(200).send({ msg: "skill data found", data: findSkill });
         } else {
@@ -251,7 +251,7 @@ exports.skillExpertise = async (req, res) => {
 };
 exports.addskill = async (req, res) => {
     try {
-        let findSkill = await User.findOne({ _id: req.user.id });
+        let findSkill = await User.findOne({ _id: req.user._id });
         if (findSkill) {
             let skill = [];
             for (let i = 0; i < findSkill.skills.length; i++) {
@@ -264,7 +264,7 @@ exports.addskill = async (req, res) => {
                 skill: req.body.skill,
             };
             skill.push(obj);
-            const data = await User.findOneAndUpdate({ _id: req.user.id }, { $set: { skills: skill } }, { new: true });
+            const data = await User.findOneAndUpdate({ _id: req.user._id }, { $set: { skills: skill } }, { new: true });
             res.status(200).send({ msg: "skill added", data: data });
         } else {
             return res.status(404).send({ msg: "not found" });
@@ -279,7 +279,7 @@ exports.addskill = async (req, res) => {
 };
 exports.addExpertise = async (req, res) => {
     try {
-        let findSkill = await User.findOne({ _id: req.user.id });
+        let findSkill = await User.findOne({ _id: req.user._id });
         if (findSkill) {
             let expertise = [];
             for (let i = 0; i < findSkill.expertises.length; i++) {
@@ -292,7 +292,7 @@ exports.addExpertise = async (req, res) => {
                 expertise: req.body.expertise,
             };
             expertise.push(obj);
-            const data = await User.findOneAndUpdate({ _id: req.user.id }, { $set: { expertises: expertise } }, { new: true });
+            const data = await User.findOneAndUpdate({ _id: req.user._id }, { $set: { expertises: expertise } }, { new: true });
             res.status(200).send({ msg: "skill added", data: data });
         } else {
             return res.status(404).send({ msg: "not found" });
@@ -307,10 +307,10 @@ exports.addExpertise = async (req, res) => {
 };
 exports.createCase = async (req, res) => {
     try {
-        req.body.lawyer = req.user.id;
+        req.body.lawyer = req.user._id;
         const result = await caseModel.create(req.body);
         if (result) {
-            let findClient = await clientModel.findOne({ lawyer: req.user.id });
+            let findClient = await clientModel.findOne({ lawyer: req.user._id });
             if (findClient) {
                 if (findClient.clients.includes((result.userId).toString())) {
                     res.status(200).send({ msg: "Cases added", data: result });
@@ -319,7 +319,7 @@ exports.createCase = async (req, res) => {
                     res.status(200).send({ msg: "Cases added", data: result });
                 }
             } else {
-                let obj = { lawyer: req.user.id };
+                let obj = { lawyer: req.user._id };
                 const result1 = await clientModel.create(obj);
                 if (result1) {
                     let update = await clientModel.findByIdAndUpdate({ _id: result1._id }, { $push: { clients: (result.userId).toString() } }, { new: true })
@@ -360,7 +360,7 @@ exports.updateCase = async (req, res) => {
 };
 exports.getCase = async (req, res) => {
     try {
-        const data = await caseModel.find({ lawyer: req.user.id }).populate('lawyer userId');
+        const data = await caseModel.find({ lawyer: req.user._id }).populate('lawyer userId');
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -412,7 +412,7 @@ exports.createAppointment = async (req, res) => {
 };
 exports.upcomingAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ lawyer: req.user.id }).populate('lawyer userId case');
+        const FindAppointment = await appointment.find({ lawyer: req.user._id }).populate('lawyer userId case');
         if (FindAppointment.length == 0) {
             res.status(404).json({ message: "upcoming appointment not found", data: {}, status: 404 });
         } else {
@@ -425,7 +425,7 @@ exports.upcomingAppointment = async (req, res) => {
 };
 exports.allCancelAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ lawyer: req.user.id, appointmentStatus: "Cancel" }).populate('lawyer userId case');
+        const FindAppointment = await appointment.find({ lawyer: req.user._id, appointmentStatus: "Cancel" }).populate('lawyer userId case');
         if (FindAppointment.length == 0) {
             res.status(404).json({ message: "Cancel appointment not found", data: {}, status: 404 });
         } else {
@@ -440,7 +440,7 @@ exports.allCancelAppointment = async (req, res) => {
 };
 exports.pastAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ lawyer: req.user.id, appointmentStatus: "Done" }).populate('lawyer userId case');
+        const FindAppointment = await appointment.find({ lawyer: req.user._id, appointmentStatus: "Done" }).populate('lawyer userId case');
         if (FindAppointment.length == 0) {
             res.status(404).json({ message: "Past appointment not found", data: {}, status: 404 });
         } else {
@@ -473,7 +473,7 @@ exports.createBill = async (req, res) => {
     if (!findUser) {
         return res.status(400).send({ msg: "not found" });
     } else {
-        req.body.lawyerId = req.user.id;
+        req.body.lawyerId = req.user._id;
         req.body.customerId = findUser._id;
         const result = await billModel.create(req.body);
         res.status(200).send({ msg: "bill added", data: result });
@@ -481,7 +481,7 @@ exports.createBill = async (req, res) => {
 };
 exports.getAllbill = async (req, res) => {
     try {
-        const data = await billModel.find({ lawyerId: req.user.id });
+        const data = await billModel.find({ lawyerId: req.user._id });
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -514,7 +514,7 @@ exports.upcommingCase = async (req, res) => {
         let fullDate = (`${year}-${month1}-${date1}`).toString()
         const d = new Date(fullDate);
         let text = d.toISOString();
-        const data = await caseModel.find({ lawyer: req.user.id, hearingDate: { $gte: text } }).populate('userId lawyer');
+        const data = await caseModel.find({ lawyer: req.user._id, hearingDate: { $gte: text } }).populate('userId lawyer');
         if (!data || data.length === 0) {
             return res.status(400).send({ status: 404, msg: "not found" });
         }
@@ -529,7 +529,7 @@ exports.upcommingCase = async (req, res) => {
 };
 exports.getAllRating = async (req, res) => {
     try {
-        const data = await rating.find({ lawyerId: req.user.id }).populate('userId');
+        const data = await rating.find({ lawyerId: req.user._id }).populate('userId');
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -544,7 +544,7 @@ exports.getAllRating = async (req, res) => {
 };
 exports.getrefferalCode = async (req, res) => {
     try {
-        const usersDocument = await User.findOne({ _id: req.user.id, });
+        const usersDocument = await User.findOne({ _id: req.user._id, });
         if (usersDocument) {
             return res.status(200).json({ message: "get Profile", data: usersDocument.refferalCode });
         } else {
@@ -557,7 +557,7 @@ exports.getrefferalCode = async (req, res) => {
 
 exports.getAllClient = async (req, res) => {
     try {
-        const data = await clientModel.find({ lawyer: req.user.id }).populate('clients');
+        const data = await clientModel.find({ lawyer: req.user._id }).populate('clients');
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }

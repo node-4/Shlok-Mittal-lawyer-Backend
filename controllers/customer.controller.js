@@ -83,7 +83,7 @@ exports.signin = async (req, res) => {
 };
 exports.getProfile = async (req, res) => {
     try {
-        const usersDocument = await userModel.findOne({ _id: req.user.id, });
+        const usersDocument = await userModel.findOne({ _id: req.user._id, });
         if (usersDocument) {
             return res.status(200).json({ message: "get Profile", data: usersDocument });
         } else {
@@ -248,7 +248,7 @@ exports.SaveDocument = async (req, res) => {
             res.status(404).send({ message: "Document not found.", data: {} });
         } else {
             const usersDocument = await saveDocuments.findOne({
-                userId: req.user.id,
+                userId: req.user._id,
             });
             if (usersDocument) {
                 let documents = [];
@@ -269,7 +269,7 @@ exports.SaveDocument = async (req, res) => {
                 let documents = [];
                 let obj = { id: findDocument._id };
                 documents.push(obj);
-                const data = { userId: req.user.id, documents: documents };
+                const data = { userId: req.user._id, documents: documents };
                 const Data = await saveDocuments.create(data);
                 return res.status(200).json(Data);
             }
@@ -283,7 +283,7 @@ exports.SaveDocument = async (req, res) => {
 };
 exports.getSaveDocument = async (req, res) => {
     try {
-        const usersDocument = await saveDocuments.find({ userId: req.user.id }).populate('documents');
+        const usersDocument = await saveDocuments.find({ userId: req.user._id }).populate('documents');
         if (usersDocument.length === 0) {
             return res.status(404).json({ message: "save Document not found" });
         }
@@ -298,11 +298,11 @@ exports.getSaveDocument = async (req, res) => {
 };
 exports.createAppointment = async (req, res) => {
     try {
-        const findUser = await User.findById({ _id: req.user.id });
+        const findUser = await User.findById({ _id: req.user._id });
         if (findUser) {
             let data = {
                 lawyer: req.body.lawyerId,
-                userId: req.user.id,
+                userId: req.user._id,
                 case: req.body.caseId,
                 appointmentDate: req.body.appointmentDate,
                 appointmentType: req.body.appointmentType,
@@ -323,7 +323,7 @@ exports.createAppointment = async (req, res) => {
 };
 exports.cancelAppointment = async (req, res) => {
     try {
-        const findUser = await User.findById({ _id: req.user.id });
+        const findUser = await User.findById({ _id: req.user._id });
         if (findUser) {
             const FindAppointment = await appointment.findById({ _id: req.params.id });
             if (FindAppointment) {
@@ -344,7 +344,7 @@ exports.cancelAppointment = async (req, res) => {
 };
 exports.upcomingAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ userId: req.user.id, appointmentStatus: "Pending" }).populate('lawyer userId');
+        const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Pending" }).populate('lawyer userId');
         res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
     } catch (err) {
         console.log(err);
@@ -353,7 +353,7 @@ exports.upcomingAppointment = async (req, res) => {
 };
 exports.allCancelAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ userId: req.user.id, appointmentStatus: "Cancel" }).populate('lawyer userId');
+        const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Cancel" }).populate('lawyer userId');
         res.status(200).json({ message: "All Document", data: FindAppointment });
     } catch (err) {
         console.log(err);
@@ -364,7 +364,7 @@ exports.allCancelAppointment = async (req, res) => {
 };
 exports.pastAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ userId: req.user.id, appointmentStatus: "Done" }).populate('lawyer userId');
+        const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Done" }).populate('lawyer userId');
         res.status(200).json({ message: "All Document", data: FindAppointment });
     } catch (err) {
         console.log(err);
@@ -375,7 +375,7 @@ exports.pastAppointment = async (req, res) => {
 };
 exports.getAllbill = async (req, res) => {
     try {
-        const data = await billModel.find({ customerId: req.user.id });
+        const data = await billModel.find({ customerId: req.user._id });
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -393,7 +393,7 @@ exports.giveRating = async (req, res) => {
         const findUser = await User.findById({ _id: req.params.id });
         if (findUser) {
             let data = {
-                userId: req.user.id,
+                userId: req.user._id,
                 lawyerId: req.params.id,
                 rating: req.body.rating,
                 comment: req.body.comment,
@@ -425,7 +425,7 @@ exports.giveRating = async (req, res) => {
 };
 exports.getCase = async (req, res) => {
     try {
-        const data = await caseModel.find({ userId: req.user.id }).populate('lawyer userId');
+        const data = await caseModel.find({ userId: req.user._id }).populate('lawyer userId');
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -440,7 +440,7 @@ exports.getCase = async (req, res) => {
 };
 exports.getrefferalCode = async (req, res) => {
     try {
-        const usersDocument = await userModel.findOne({ _id: req.user.id, });
+        const usersDocument = await userModel.findOne({ _id: req.user._id, });
         if (usersDocument) {
             return res.status(200).json({ message: "get Profile", data: usersDocument.refferalCode });
         } else {
@@ -452,7 +452,7 @@ exports.getrefferalCode = async (req, res) => {
 };
 exports.getAllLawyer = async (req, res) => {
     try {
-        const data = await clientModel.find({ clients: { $in: req.user.id } }).populate('lawyer');
+        const data = await clientModel.find({ clients: { $in: req.user._id } }).populate('lawyer');
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
