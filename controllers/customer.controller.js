@@ -22,6 +22,7 @@ exports.registration = async (req, res) => {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
             req.body.userType = "CUSTOMER";
             req.body.refferalCode = await reffralCode();
+            console.log(req.body);
             const userCreate = await User.create(req.body);
             res.status(200).send({
                 message: "registered successfully ",
