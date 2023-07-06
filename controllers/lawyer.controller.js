@@ -180,6 +180,7 @@ exports.resetPassword = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const { fullName, email, phone, password, bio, hearingFee, languages, } = req.body;
+        console.log("==================", req.body);
         const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
@@ -188,21 +189,24 @@ exports.update = async (req, res) => {
         if (req.file) {
             fileUrl = req.file ? req.file.path : "";
         }
-        console.log("==================",req.body);
-        user.fullName = fullName || user.fullName;
-        user.email = email || user.email;
-        user.phone = phone || user.phone;
-        user.image = fileUrl || user.image;
-        user.bio = bio || user.bio;
-        user.hearingFee = hearingFee || user.hearingFee;
-        user.languages = languages || user.languages;
+        let passwords;
         if (req.body.password) {
-            user.password = bcrypt.hashSync(req.body.password, 8) || user.password;
+            passwords = bcrypt.hashSync(req.body.password, 8) || user.password;
         }
-        const updated = await user.save();
+        let obj = {
+            fullName: fullName || user.fullName,
+            email: email || user.email,
+            phone: phone || user.phone,
+            image: fileUrl || user.image,
+            bio: bio || user.bio,
+            hearingFee: hearingFee || user.hearingFee,
+            languages: languages || user.languages,
+            password: passwords
+        }
+        const updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true });
         res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
-        console.log("---------------",err);
+        console.log("---------------", err);
         res.status(500).send({ message: "internal server error " + err.message, });
     }
 };
