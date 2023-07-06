@@ -201,7 +201,7 @@ exports.update = async (req, res) => {
         const updated = await user.save();
         res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
-        console.log(err);
+        console.log("---------------",err);
         res.status(500).send({ message: "internal server error " + err.message, });
     }
 };
