@@ -118,9 +118,9 @@ exports.getUsers = async (req, res) => {
     try {
         const findLawyer = await User.find({ userType: "CUSTOMER" });
         if (findLawyer.length === 0) {
-            return res.status(404).json({ message: "Lawyer not found" });
+            return res.status(404).json({ message: "user not found" });
         }
-        return res.status(200).json(findLawyer);
+        return res.status(200).json({ status: 200, message: "user  found", data: findLawyer, });
     } catch (err) {
         console.log(err.message);
         return res.status(500).json({
