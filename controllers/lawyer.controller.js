@@ -333,7 +333,7 @@ exports.createCase = async (req, res) => {
             }
         }
     } catch (err) {
-        console.log(err.message);
+        console.log(err);
         res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
