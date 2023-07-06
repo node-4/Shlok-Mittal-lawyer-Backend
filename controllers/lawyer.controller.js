@@ -188,6 +188,7 @@ exports.update = async (req, res) => {
         if (req.file) {
             fileUrl = req.file ? req.file.path : "";
         }
+        console.log("==================",req.body);
         user.fullName = fullName || user.fullName;
         user.email = email || user.email;
         user.phone = phone || user.phone;
