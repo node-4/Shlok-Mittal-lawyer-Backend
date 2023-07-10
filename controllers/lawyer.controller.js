@@ -13,7 +13,7 @@ const rating = require("../models/rating.model");
 exports.registration = async (req, res) => {
     const { phone, email } = req.body;
     try {
-        req.body.email = email.split(" ").join("").toLowerCase();
+        req.body.email = req.body.email.split(" ").join("").toLowerCase();
         let user = await User.findOne({ $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }], userType: "LAWYER", });
         if (!user) {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
