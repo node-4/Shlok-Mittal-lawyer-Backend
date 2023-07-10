@@ -16,7 +16,7 @@ exports.registration = async (req, res) => {
         // req.body.email = req.body.email.split(" ").join("").toLowerCase();
         let user = await User.findOne({ $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }], userType: "LAWYER", });
         if (!user) {
-            req.body.password = bcrypt.hashSync(req.body.password, 8);
+            req.body.password = bcrypt.hashSync(req.params.password, 8);
             req.body.userType = "LAWYER";
             req.body.refferalCode = await reffralCode();
             let barRegist = req.files['barRegistrationImage'];
