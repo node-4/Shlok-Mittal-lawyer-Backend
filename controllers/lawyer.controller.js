@@ -128,9 +128,9 @@ exports.getProfile = async (req, res) => {
     }
 };
 exports.resendOTP = async (req, res) => {
-    const { phone } = req.params;
+    const { id } = req.params;
     try {
-        const user = await User.findOne({ phone: phone, userType: "LAWYER" });
+        const user = await User.findOne({ id, userType: "LAWYER" });
         if (!user) {
             return res.status(400).send({ message: "User not found" });
         }
