@@ -2,7 +2,22 @@ const { validateUser } = require("../middlewares");
 const auth = require("../controllers/customer.controller");
 const wallet = require("../controllers/wallet.controller");
 const { authJwt, authorizeRoles } = require("../middlewares");
-
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
+cloudinary.config({
+    cloud_name: "dbrvq9uxa",
+    api_key: "567113285751718",
+    api_secret: "rjTsz9ksqzlDtsrlOPcTs_-QtW4",
+});
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "images/image",
+        allowed_formats: ["jpg", "jpeg", "png", "PNG", "xlsx", "xls", "pdf", "PDF"],
+    },
+});
+const upload = multer({ storage: storage });
 module.exports = (app) => {
     app.post("/api/v1/customer/registration", auth.registration);
     app.post("/api/v1/customer/login", auth.loginWithPhone);
@@ -12,7 +27,7 @@ module.exports = (app) => {
     app.put("/api/v1/customer/resetPassword/:id", auth.resetPassword);
     app.get("/api/v1/customer/allLawyer", auth.getLawyers);
     app.get("/api/v1/customer/getLawyersbyCategory/:categoryId", auth.getLawyersbyCategory);
-    app.put("/api/v1/customer/update",  [authJwt.verifyToken], auth.update);
+    app.put("/api/v1/customer/update",  [authJwt.verifyToken],upload.single("image"), auth.update);
     app.get("/api/v1/customer/getProfile",  [authJwt.verifyToken], auth.getProfile);
     app.post("/api/v1/customer/saveDocument/:id",  [authJwt.verifyToken], auth.SaveDocument);
     app.get("/api/v1/customer/getSaveDocument",  [authJwt.verifyToken], auth.getSaveDocument);

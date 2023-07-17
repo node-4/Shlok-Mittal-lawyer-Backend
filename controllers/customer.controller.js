@@ -189,10 +189,14 @@ exports.update = async (req, res) => {
         if (!user) {
             return res.status(404).send({ message: "not found" });
         }
+        let fileUrl;
+        if (req.file) {
+            fileUrl = req.file ? req.file.path : "";
+        }
         user.name = name || user.name;
         user.email = email || user.email;
         user.phone = phone || user.phone;
-        user.image = image || user.image;
+        user.image = fileUrl || user.image;
         user.kyc = kyc || user.kyc;
         user.whatAppNotification =
             whatAppNotification || user.whatAppNotification;
