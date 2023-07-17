@@ -150,6 +150,7 @@ var userSchema = new schema(
         },
         rating: {
             type: Number,
+            default: 0,
         },
         wallet: {
             type: Number,

@@ -185,7 +185,7 @@ exports.update = async (req, res) => {
             image,
             blogNotification,
         } = req.body;
-        const user = await User.findById(req.params.id);
+        const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
         }
@@ -466,6 +466,22 @@ exports.getAllLawyer = async (req, res) => {
         console.log(err.message);
         res.status(500).send({
             msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
+
+exports.getLawyersbyRating = async (req, res) => {
+    try {
+        const findLawyer = await User.find({ userType: "LAWYER", rating: { $gte: req.params.rating } });
+        if (findLawyer.length === 0) {
+            return res.status(404).json({ message: "Lawyer not found" });
+        }
+        return res.status(200).json(findLawyer);
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).json({
+            message: "server error while getting lawyer",
             error: err.message,
         });
     }
