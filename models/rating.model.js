@@ -17,6 +17,9 @@ const schema = new mongoose.Schema(
         comment: {
             type: String,
         },
+        subject: {
+            type: String,
+        },
         date: {
             type: Date,
         },

@@ -25,7 +25,21 @@ const casesSchema = mongoose.Schema({
     appointmentTime: {
         type: String,
     },
-});
+    totalTime: {
+        type: String,
+    },
+    joinStatus: {
+        type: String,
+        enum: ["Accept", "Pending"],
+    },
+    callType: {
+        type: String,
+        enum: ["INSTANT", "BOOKING"]
+    },
+    lawyers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+    }],
+}, { timestamps: true });
 const cases = mongoose.model("appointments", casesSchema);
-
 module.exports = cases;

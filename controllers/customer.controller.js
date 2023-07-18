@@ -311,10 +311,61 @@ exports.createAppointment = async (req, res) => {
                 case: req.body.caseId,
                 appointmentDate: req.body.appointmentDate,
                 appointmentType: req.body.appointmentType,
-                appointmentTime: req.body.appointmentTime
+                appointmentTime: req.body.appointmentTime,
+                callType: "BOOKING"
             };
             const Data = await appointment.create(data);
             return res.status(200).json(Data);
+        } else {
+            res.status(404).send({ message: "Document not found.", data: {} });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(501).send({
+            message: "server error.",
+            data: {},
+        });
+    }
+};
+exports.instantAppointment = async (req, res) => {
+    try {
+        const findUser = await User.findById({ _id: req.user._id });
+        if (findUser) {
+            let lawyers = [];
+            let hrs = new Date(Date.now()).getHours();
+            let min = new Date(Date.now()).getMinutes();
+            let hrs1, mins;
+            if (hrs < 10) {
+                hrs1 = '' + 0 + hrs;
+            } else {
+                hrs1 = hrs;
+            }
+            if (min < 10) {
+                mins = '' + 0 + min;
+            } else {
+                mins = min;
+            }
+            const findLawyer = await User.find({ userType: "LAWYER" });
+            if (findLawyer.length === 0) {
+                return res.status(404).json({ message: "Lawyer not found" });
+            } else {
+                for (let i = 0; i < findLawyer.length; i++) {
+                    lawyers.push(findLawyer[i]._id)
+                }
+            }
+            let data = {
+                userId: req.user._id,
+                appointmentType: req.body.appointmentType,
+                appointmentTime: `${hrs1}:${mins}`,
+                callType: "INSTANT",
+                joinStatus: "Pending",
+                lawyers: lawyers
+            };
+            const Data = await appointment.create(data);
+            if (Data) {
+                let update = await appointment.findByIdAndUpdate({ _id: Data._id }, { $set: { appointmentDate: Data.createdAt } }, { new: true })
+                return res.status(200).json(update);
+            }
         } else {
             res.status(404).send({ message: "Document not found.", data: {} });
         }
@@ -402,6 +453,7 @@ exports.giveRating = async (req, res) => {
                 lawyerId: req.params.id,
                 rating: req.body.rating,
                 comment: req.body.comment,
+                subject: req.body.subject,
                 date: Date.now(),
             };
             const Data = await rating.create(data);
