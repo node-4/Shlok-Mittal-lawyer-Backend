@@ -189,7 +189,7 @@ exports.update = async (req, res) => {
             password = bcrypt.hashSync(req.body.password, 8)
         }
         let obj = {
-            name: name || user.name,
+            fullName: name || user.name,
             email: email || user.email,
             phone: phone || user.phone,
             image: fileUrl || user.image,
