@@ -175,16 +175,7 @@ exports.resetPassword = async (req, res) => {
 };
 exports.update = async (req, res) => {
     try {
-        const {
-            name,
-            email,
-            phone,
-            password,
-            kyc,
-            whatAppNotification,
-            image,
-            blogNotification,
-        } = req.body;
+        const { name, email, phone, kyc, whatAppNotification, image, blogNotification, } = req.body;
         const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
@@ -193,19 +184,22 @@ exports.update = async (req, res) => {
         if (req.file) {
             fileUrl = req.file ? req.file.path : "";
         }
-        user.name = name || user.name;
-        user.email = email || user.email;
-        user.phone = phone || user.phone;
-        user.image = fileUrl || user.image;
-        user.kyc = kyc || user.kyc;
-        user.whatAppNotification =
-            whatAppNotification || user.whatAppNotification;
-        user.blogNotification = blogNotification || user.blogNotification;
+        let password;
         if (req.body.password) {
-            user.password = bcrypt.hashSync(password, 8) || user.password;
+            password = bcrypt.hashSync(req.body.password, 8)
         }
-        const updated = await user.save();
-        // console.log(updated);
+        let obj = {
+            name: name || user.name,
+            email: email || user.email,
+            phone: phone || user.phone,
+            image: fileUrl || user.image,
+            kyc: kyc || user.kyc,
+            whatAppNotification: whatAppNotification || user.whatAppNotification,
+            blogNotification: blogNotification || user.blogNotification,
+            password: password || user.password
+        }
+        console.log(obj);
+        let updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true })
         res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
         console.log(err);
