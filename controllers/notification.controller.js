@@ -8,10 +8,10 @@ exports.createNotification = async (req, res) => {
             title: req.body.title,
             isRead: false
         })
-        res.status(201).json({status: 200, message: 'Notification sent successfully.', data: notification});
+        return res.status(201).json({ status: 200, message: 'Notification sent successfully.', data: notification });
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: 'Server Error' });
+        return res.status(500).json({ message: 'Server Error' });
     }
 };
 // READ All Notifications
@@ -24,10 +24,10 @@ exports.getById = async (req, res) => {
         }
         notification.read = true;
         await notification.save()
-        res.status(200).json({ status: 200, message: 'Notification found successfully.', data: notification });
+        return res.status(200).json({ status: 200, message: 'Notification found successfully.', data: notification });
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: 'Server Error' });
+        return res.status(500).json({ message: 'Server Error' });
     }
 };
 exports.getAllNotifications = async (req, res) => {
@@ -37,10 +37,10 @@ exports.getAllNotifications = async (req, res) => {
         if (!notification || notification.length === 0) {
             return res.status(404).json({ message: 'Notification not found' });
         }
-        res.status(200).json({ status: 200, message: 'Notification found', data: notification });
+        return res.status(200).json({ status: 200, message: 'Notification found', data: notification });
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: 'Server Error' });
+        return res.status(500).json({ message: 'Server Error' });
     }
 };
 // UPDATE Notification
@@ -55,10 +55,10 @@ exports.updateNotification = async (req, res) => {
         if (!notification) {
             return res.status(404).json({ status: 404, message: 'Notification not found' });
         }
-        res.status(200).json({ status: 200, message: 'Notification found', data: notification });
+        return res.status(200).json({ status: 200, message: 'Notification found', data: notification });
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: 'Server Error' });
+        return res.status(500).json({ message: 'Server Error' });
     }
 };
 // DELETE Notification
@@ -70,9 +70,9 @@ exports.deleteNotification = async (req, res) => {
             return res.status(404).json({ message: 'Notification not found' });
         }
 
-        res.status(200).json({ status: 200, message: 'Notification deleted successfully', data: {} });
+        return res.status(200).json({ status: 200, message: 'Notification deleted successfully', data: {} });
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: 'Server Error' });
+        return res.status(500).json({ message: 'Server Error' });
     }
 };

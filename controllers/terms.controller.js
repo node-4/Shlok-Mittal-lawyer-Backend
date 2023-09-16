@@ -7,7 +7,7 @@ exports.getAllTerms = async (req, res, next) => {
             type: "TERMS&CONDITION",
         });
         if (termsAndConditions.length === 0) {
-            res.status(400).send({ success: false, message: "Terms and conditions not found" });
+            return res.status(400).send({ success: false, message: "Terms and conditions not found" });
         }
         res.json(termsAndConditions);
     } catch (err) {
@@ -17,7 +17,7 @@ exports.getAllTerms = async (req, res, next) => {
 exports.getTermById = async (req, res, next) => {
     try {
         const termsAndConditions = await TermsAndConditions.findById(req.params.id);
-        if (!termsAndConditions) {throw httpError(404, "Terms and conditions not found");}
+        if (!termsAndConditions) { throw httpError(404, "Terms and conditions not found"); }
         res.json(termsAndConditions);
     } catch (err) {
         if (err.name === "CastError" && err.kind === "ObjectId") {
@@ -37,7 +37,7 @@ exports.createTerm = async (req, res, next) => {
             content: content,
         };
         const termsAndConditions = await TermsAndConditions.create(Obj);
-        res.status(201).json(termsAndConditions);
+        return res.status(201).json(termsAndConditions);
     } catch (err) {
         next(httpError(500, err));
     }
@@ -86,7 +86,7 @@ exports.getAllPrivacyPolicy = async (req, res, next) => {
             type: "PRIVACY POLICY",
         });
         if (termsAndConditions.length === 0) {
-            res.status(400).send({ success: false, message: "Privacy and policy not found" });
+            return res.status(400).send({ success: false, message: "Privacy and policy not found" });
         }
         res.json(termsAndConditions);
     } catch (err) {
@@ -115,20 +115,20 @@ exports.createPrivacyPolicy = async (req, res, next) => {
         if (!content) {
             throw httpError(400, "Content is required");
         }
-        const Obj = {type: "PRIVACY POLICY",content: content,};
+        const Obj = { type: "PRIVACY POLICY", content: content, };
         const termsAndConditions = await TermsAndConditions.create(Obj);
-        res.status(201).json(termsAndConditions);
+        return res.status(201).json(termsAndConditions);
     } catch (err) {
         next(httpError(500, err));
     }
 };
-exports.updatePrivacyPolicy  = async (req, res, next) => {
+exports.updatePrivacyPolicy = async (req, res, next) => {
     try {
         const { content } = req.body;
         if (!content) {
             throw httpError(400, "Content is required");
         }
-        const termsAndConditions = await TermsAndConditions.findByIdAndUpdate(req.params.id,{ content: content, type:"PRIVACY POLICY" },{ new: true });
+        const termsAndConditions = await TermsAndConditions.findByIdAndUpdate(req.params.id, { content: content, type: "PRIVACY POLICY" }, { new: true });
         if (!termsAndConditions) {
             throw httpError(404, "Terms and conditions not found");
         }
@@ -140,7 +140,7 @@ exports.updatePrivacyPolicy  = async (req, res, next) => {
         next(httpError(500, err));
     }
 };
-exports.deletePrivacyPolicy  = async (req, res, next) => {
+exports.deletePrivacyPolicy = async (req, res, next) => {
     try {
         const termsAndConditions = await TermsAndConditions.findByIdAndDelete(req.params.id);
         if (!termsAndConditions) {

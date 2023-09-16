@@ -26,13 +26,13 @@ exports.registration = async (req, res) => {
             req.body.barCertificateImage = barCert[0].path;
             req.body.aadhar = aad[0].path;
             const userCreate = await User.create(req.body);
-            res.status(200).send({ message: "registered successfully ", data: userCreate, });
+            return res.status(200).send({ message: "registered successfully ", data: userCreate, });
         } else {
-            res.status(409).send({ message: "Already Exist", data: [] });
+            return res.status(409).send({ message: "Already Exist", data: [] });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 };
 exports.loginWithPhone = async (req, res) => {
@@ -57,10 +57,10 @@ exports.loginWithPhone = async (req, res) => {
                 new: true,
             }
         );
-        res.status(200).send({ userId: updated._id, otp: updated.otp });
+        return res.status(200).send({ userId: updated._id, otp: updated.otp });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 };
 exports.signin = async (req, res) => {
@@ -79,10 +79,10 @@ exports.signin = async (req, res) => {
         const accessToken = jwt.sign({ id: user._id }, authConfig.secret, {
             expiresIn: authConfig.accessTokenTime,
         });
-        res.status(201).send({ data: user, accessToken: accessToken });
+        return res.status(201).send({ data: user, accessToken: accessToken });
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: "Server error" + error.message });
+        return res.status(500).send({ message: "Server error" + error.message });
     }
 };
 exports.verifyOtp = async (req, res) => {
@@ -103,13 +103,13 @@ exports.verifyOtp = async (req, res) => {
         const accessToken = jwt.sign({ id: user._id }, authConfig.secret, {
             expiresIn: authConfig.accessTokenTime,
         });
-        res.status(200).send({
+        return res.status(200).send({
             message: "logged in successfully",
             accessToken: accessToken,
         });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({ error: "internal server error" + err.message });
+        return res.status(500).send({ error: "internal server error" + err.message });
     }
 };
 exports.getProfile = async (req, res) => {
@@ -124,7 +124,7 @@ exports.getProfile = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        res.status(501).send({ message: "server error.", data: {}, });
+        return res.status(501).send({ message: "server error.", data: {}, });
     }
 };
 exports.resendOTP = async (req, res) => {
@@ -146,10 +146,10 @@ exports.resendOTP = async (req, res) => {
             { otp, otpExpiration, accountVerification },
             { new: true }
         );
-        res.status(200).send({ message: "OTP resent", otp: otp });
+        return res.status(200).send({ message: "OTP resent", otp: otp });
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: "Server error" + error.message });
+        return res.status(500).send({ message: "Server error" + error.message });
     }
 };
 exports.resetPassword = async (req, res) => {
@@ -165,16 +165,16 @@ exports.resetPassword = async (req, res) => {
                 { $set: { password: bcrypt.hashSync(req.body.newPassword) } },
                 { new: true }
             );
-            res.status(200).send({ message: "Password update successfully.", data: updated, });
+            return res.status(200).send({ message: "Password update successfully.", data: updated, });
         } else {
-            res.status(501).send({
+            return res.status(501).send({
                 message: "Password Not matched.",
                 data: {},
             });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: "Server error" + error.message });
+        return res.status(500).send({ message: "Server error" + error.message });
     }
 };
 exports.update = async (req, res) => {
@@ -204,10 +204,10 @@ exports.update = async (req, res) => {
             password: passwords
         }
         const updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true });
-        res.status(200).send({ message: "updated", data: updated });
+        return res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
         console.log("---------------", err);
-        res.status(500).send({ message: "internal server error " + err.message, });
+        return res.status(500).send({ message: "internal server error " + err.message, });
     }
 };
 exports.updateProfile = async (req, res) => {
@@ -230,10 +230,10 @@ exports.updateProfile = async (req, res) => {
         }
         const updated = await user.save();
         // console.log(updated);
-        res.status(200).send({ message: "updated", data: updated });
+        return res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
         console.log(err);
-        res.status(500).send({
+        return res.status(500).send({
             message: "internal server error " + err.message,
         });
     }
@@ -242,13 +242,13 @@ exports.skillExpertise = async (req, res) => {
     try {
         let findSkill = await User.findOne({ _id: req.user._id });
         if (findSkill) {
-            res.status(200).send({ msg: "skill data found", data: findSkill });
+            return res.status(200).send({ msg: "skill data found", data: findSkill });
         } else {
             return res.status(404).send({ msg: "not found" });
         }
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -270,13 +270,13 @@ exports.addskill = async (req, res) => {
             };
             skill.push(obj);
             const data = await User.findOneAndUpdate({ _id: req.user._id }, { $set: { skills: skill } }, { new: true });
-            res.status(200).send({ msg: "skill added", data: data });
+            return res.status(200).send({ msg: "skill added", data: data });
         } else {
             return res.status(404).send({ msg: "not found" });
         }
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -298,13 +298,13 @@ exports.addExpertise = async (req, res) => {
             };
             expertise.push(obj);
             const data = await User.findOneAndUpdate({ _id: req.user._id }, { $set: { expertises: expertise } }, { new: true });
-            res.status(200).send({ msg: "skill added", data: data });
+            return res.status(200).send({ msg: "skill added", data: data });
         } else {
             return res.status(404).send({ msg: "not found" });
         }
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -318,23 +318,23 @@ exports.createCase = async (req, res) => {
             let findClient = await clientModel.findOne({ lawyer: req.user._id });
             if (findClient) {
                 if (findClient.clients.includes((result.userId).toString())) {
-                    res.status(200).send({ msg: "Cases added", data: result });
+                    return res.status(200).send({ msg: "Cases added", data: result });
                 } else {
                     let update = await clientModel.findByIdAndUpdate({ _id: findClient._id }, { $push: { clients: (result.userId).toString() } }, { new: true })
-                    res.status(200).send({ msg: "Cases added", data: result });
+                    return res.status(200).send({ msg: "Cases added", data: result });
                 }
             } else {
                 let obj = { lawyer: req.user._id };
                 const result1 = await clientModel.create(obj);
                 if (result1) {
                     let update = await clientModel.findByIdAndUpdate({ _id: result1._id }, { $push: { clients: (result.userId).toString() } }, { new: true })
-                    res.status(200).send({ msg: "Cases added", data: result });
+                    return res.status(200).send({ msg: "Cases added", data: result });
                 }
             }
         }
     } catch (err) {
         console.log(err);
-        res.status(500).send({ msg: "internal server error ", error: err.message, });
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.updateCase = async (req, res) => {
@@ -354,10 +354,10 @@ exports.updateCase = async (req, res) => {
         if (!update) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "updated", data: update });
+        return res.status(200).send({ msg: "updated", data: update });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -369,10 +369,10 @@ exports.getCase = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -384,10 +384,10 @@ exports.getIdCase = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({ msg: "internal server error ", error: err.message, });
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.createAppointment = async (req, res) => {
@@ -405,11 +405,11 @@ exports.createAppointment = async (req, res) => {
             const Data = await appointment.create(data);
             return res.status(200).json(Data);
         } else {
-            res.status(404).send({ message: "Document not found.", data: {} });
+            return res.status(404).send({ message: "Document not found.", data: {} });
         }
     } catch (error) {
         console.log(error);
-        res.status(501).send({
+        return res.status(501).send({
             message: "server error.",
             data: {},
         });
@@ -419,26 +419,26 @@ exports.upcomingAppointment = async (req, res) => {
     try {
         const FindAppointment = await appointment.find({ lawyer: req.user._id }).populate('lawyer userId case');
         if (FindAppointment.length == 0) {
-            res.status(404).json({ message: "upcoming appointment not found", data: {}, status: 404 });
+            return res.status(404).json({ message: "upcoming appointment not found", data: {}, status: 404 });
         } else {
-            res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
+            return res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
         }
     } catch (err) {
         console.log(err);
-        res.status(400).json({ message: err.message, });
+        return res.status(400).json({ message: err.message, });
     }
 };
 exports.allCancelAppointment = async (req, res) => {
     try {
         const FindAppointment = await appointment.find({ lawyer: req.user._id, appointmentStatus: "Cancel" }).populate('lawyer userId case');
         if (FindAppointment.length == 0) {
-            res.status(404).json({ message: "Cancel appointment not found", data: {}, status: 404 });
+            return res.status(404).json({ message: "Cancel appointment not found", data: {}, status: 404 });
         } else {
-            res.status(200).json({ message: "All cancel Appointment", data: FindAppointment, status: 200 });
+            return res.status(200).json({ message: "All cancel Appointment", data: FindAppointment, status: 200 });
         }
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message,
         });
     }
@@ -447,13 +447,13 @@ exports.pastAppointment = async (req, res) => {
     try {
         const FindAppointment = await appointment.find({ lawyer: req.user._id, appointmentStatus: "Done" }).populate('lawyer userId case');
         if (FindAppointment.length == 0) {
-            res.status(404).json({ message: "Past appointment not found", data: {}, status: 404 });
+            return res.status(404).json({ message: "Past appointment not found", data: {}, status: 404 });
         } else {
-            res.status(200).json({ message: "All past appointment", data: FindAppointment });
+            return res.status(200).json({ message: "All past appointment", data: FindAppointment });
         }
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message,
         });
     }
@@ -464,10 +464,10 @@ exports.deleteCase = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "deleted", data: data });
+        return res.status(200).send({ msg: "deleted", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error",
             error: err.message,
         });
@@ -481,7 +481,7 @@ exports.createBill = async (req, res) => {
         req.body.lawyerId = req.user._id;
         req.body.customerId = findUser._id;
         const result = await billModel.create(req.body);
-        res.status(200).send({ msg: "bill added", data: result });
+        return res.status(200).send({ msg: "bill added", data: result });
     }
 };
 exports.getAllbill = async (req, res) => {
@@ -490,10 +490,10 @@ exports.getAllbill = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -523,10 +523,10 @@ exports.upcommingCase = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ status: 404, msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -538,10 +538,10 @@ exports.getAllRating = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -556,7 +556,7 @@ exports.getrefferalCode = async (req, res) => {
             return res.status(404).json({ message: "No data found", data: {} });
         }
     } catch (error) {
-        res.status(501).send({ message: "server error.", data: {}, });
+        return res.status(501).send({ message: "server error.", data: {}, });
     }
 };
 
@@ -566,10 +566,10 @@ exports.getAllClient = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });

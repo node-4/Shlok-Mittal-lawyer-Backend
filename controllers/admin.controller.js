@@ -25,16 +25,16 @@ exports.registration = async (req, res) => {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
             req.body.userType = "ADMIN";
             const userCreate = await User.create(req.body);
-            res.status(200).send({
+            return res.status(200).send({
                 message: "registered successfully ",
                 data: userCreate,
             });
         } else {
-            res.status(409).send({ message: "Already Exist", data: [] });
+            return res.status(409).send({ message: "Already Exist", data: [] });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 };
 exports.signin = async (req, res) => {
@@ -53,10 +53,10 @@ exports.signin = async (req, res) => {
         const accessToken = jwt.sign({ id: user._id }, authConfig.secret, {
             expiresIn: authConfig.accessTokenTime,
         });
-        res.status(201).send({ data: user, accessToken: accessToken });
+        return res.status(201).send({ data: user, accessToken: accessToken });
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: "Server error" + error.message });
+        return res.status(500).send({ message: "Server error" + error.message });
     }
 };
 exports.update = async (req, res) => {
@@ -75,10 +75,10 @@ exports.update = async (req, res) => {
         }
         const updated = await user.save();
         // console.log(updated);
-        res.status(200).send({ message: "updated", data: updated });
+        return res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
         console.log(err);
-        res.status(500).send({
+        return res.status(500).send({
             message: "internal server error " + err.message,
         });
     }
@@ -91,10 +91,10 @@ exports.dashboard = async (req, res) => {
             totalUser: totalUser,
             totalLawyer: totalLawyer,
         };
-        res.status(200).send({ message: "Data found successfully", data: obj });
+        return res.status(200).send({ message: "Data found successfully", data: obj });
     } catch (err) {
         console.log(err);
-        res.status(500).send({
+        return res.status(500).send({
             message: "internal server error " + err.message,
         });
     }
@@ -134,10 +134,10 @@ exports.createCategory = async (req, res) => {
         const category = { name: req.body.name, image: req.body.image, };
         const categoryCreated = await Category.create(category);
         console.log(`#### Category add successfully #### /n ${categoryCreated} `);
-        res.status(201).send({ message: "Category add successfully", data: categoryCreated, });
+        return res.status(201).send({ message: "Category add successfully", data: categoryCreated, });
     } catch (err) {
         console.log("#### error while Category create #### ", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message: "Internal server error while creating category",
         });
     }
@@ -148,10 +148,10 @@ exports.getCategory = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ status: 200, message: "Data found", data: data });
+        return res.status(200).send({ status: 200, message: "Data found", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({ msg: "internal server error ", error: err.message, });
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.getCategoryId = async (req, res) => {
@@ -160,10 +160,10 @@ exports.getCategoryId = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -175,10 +175,10 @@ exports.updateCategory = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "updated", data: data });
+        return res.status(200).send({ msg: "updated", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({ msg: "internal server error ", error: err.message, });
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.deleteCategory = async (req, res) => {
@@ -187,10 +187,10 @@ exports.deleteCategory = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "deleted", data: data });
+        return res.status(200).send({ msg: "deleted", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error",
             error: err.message,
         });
@@ -203,13 +203,13 @@ exports.createDepartment = async (req, res) => {
             name: req.body.name,
         };
         const departmentCreated = await Department.create(department);
-        res.status(201).send({
+        return res.status(201).send({
             message: "Department add successfully",
             data: departmentCreated,
         });
     } catch (err) {
         console.log("#### error while Category create #### ", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message: "Internal server error while creating category",
         });
     }
@@ -223,10 +223,10 @@ exports.getDepartment = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -238,10 +238,10 @@ exports.getDepartmentId = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -259,10 +259,10 @@ exports.updateDepartment = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "updated", data: data });
+        return res.status(200).send({ msg: "updated", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -274,10 +274,10 @@ exports.deleteDepartment = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "deleted", data: data });
+        return res.status(200).send({ msg: "deleted", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error",
             error: err.message,
         });
@@ -287,13 +287,13 @@ exports.createService = async (req, res) => {
     try {
         const service = { userId: req.user._id, name: req.body.name };
         const serviceCreated = await Service.create(service);
-        res.status(201).send({
+        return res.status(201).send({
             message: "Service add successfully",
             data: serviceCreated,
         });
     } catch (err) {
         console.log("#### error while Category create #### ", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message: "Internal server error while creating category",
         });
     }
@@ -307,10 +307,10 @@ exports.getService = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -322,10 +322,10 @@ exports.getServiceId = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -339,10 +339,10 @@ exports.updateService = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "updated", data: data });
+        return res.status(200).send({ msg: "updated", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -354,10 +354,10 @@ exports.deleteService = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "deleted", data: data });
+        return res.status(200).send({ msg: "deleted", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error",
             error: err.message,
         });
@@ -373,13 +373,13 @@ exports.createLocation = async (req, res) => {
             code: req.body.code,
         };
         const locationCreated = await Location.create(location);
-        res.status(201).send({
+        return res.status(201).send({
             message: "Location add successfully",
             data: locationCreated,
         });
     } catch (err) {
         console.log("#### error while Category create #### ", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message: "Internal server error while creating category",
         });
     }
@@ -393,10 +393,10 @@ exports.getLocation = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -408,10 +408,10 @@ exports.getLocationId = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -425,10 +425,10 @@ exports.updateLocation = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "updated", data: data });
+        return res.status(200).send({ msg: "updated", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -440,10 +440,10 @@ exports.deleteLocation = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "deleted", data: data });
+        return res.status(200).send({ msg: "deleted", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error",
             error: err.message,
         });
@@ -460,16 +460,16 @@ exports.CreateLawyer = async (req, res) => {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
             req.body.userType = "LAWYER";
             const userCreate = await User.create(req.body);
-            res.status(200).send({
+            return res.status(200).send({
                 message: "registered successfully ",
                 data: userCreate,
             });
         } else {
-            res.status(409).send({ message: "Already Exist", data: [] });
+            return res.status(409).send({ message: "Already Exist", data: [] });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 };
 exports.updateLawyer = async (req, res) => {
@@ -502,10 +502,10 @@ exports.updateLawyer = async (req, res) => {
         }
         const updated = await user.save();
         // console.log(updated);
-        res.status(200).send({ message: "updated", data: updated });
+        return res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
         console.log(err);
-        res.status(500).send({
+        return res.status(500).send({
             message: "internal server error " + err.message,
         });
     }
@@ -516,10 +516,10 @@ exports.deleteUser = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "deleted", data: data });
+        return res.status(200).send({ msg: "deleted", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error",
             error: err.message,
         });
@@ -532,13 +532,13 @@ exports.AddBanner = async (req, res) => {
             desc: req.body.desc
         }
         const Data = await banner.create(data);
-        res.status(200).json({
+        return res.status(200).json({
             message: "Banner is Addded ",
             data: Data
         })
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message
         })
     }
@@ -546,13 +546,13 @@ exports.AddBanner = async (req, res) => {
 exports.getBanner = async (req, res) => {
     try {
         const Banner = await banner.find();
-        res.status(200).json({
+        return res.status(200).json({
             message: "All Banners",
             data: Banner
         })
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message
         })
     }
@@ -560,13 +560,13 @@ exports.getBanner = async (req, res) => {
 exports.getByIdBanner = async (req, res) => {
     try {
         const Banner = await banner.findById({ _id: req.params.id });
-        res.status(200).json({
+        return res.status(200).json({
             message: "One Banners",
             data: Banner
         })
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message
         })
     }
@@ -574,11 +574,11 @@ exports.getByIdBanner = async (req, res) => {
 exports.DeleteBanner = async (req, res) => {
     try {
         const Banner = await banner.findByIdAndDelete({ _id: req.params.id });
-        res.status(200).json({
+        return res.status(200).json({
             message: "Delete Banner ",
         })
     } catch (err) {
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message
         })
     }
@@ -587,13 +587,13 @@ exports.createCourtCategory = async (req, res) => {
     try {
         const courtCategory = { name: req.body.name, type: "Court" };
         const courtCategoryCreated = await CourtCategory.create(courtCategory);
-        res.status(201).send({
+        return res.status(201).send({
             message: "Court Category add successfully",
             data: courtCategoryCreated,
         });
     } catch (err) {
         console.log("#### error while Court Category create #### ", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message: "Internal server error while creating Court Category",
         });
     }
@@ -604,10 +604,10 @@ exports.getCourtCategory = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -619,10 +619,10 @@ exports.getCourtCategoryId = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -637,10 +637,10 @@ exports.updateCourtCategory = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "updated", data: data });
+        return res.status(200).send({ msg: "updated", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -652,10 +652,10 @@ exports.deleteCourtCategory = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "deleted", data: data });
+        return res.status(200).send({ msg: "deleted", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error",
             error: err.message,
         });
@@ -665,13 +665,13 @@ exports.createCaseCategory = async (req, res) => {
     try {
         const courtCategory = { name: req.body.name, type: "Case" };
         const courtCategoryCreated = await CourtCategory.create(courtCategory);
-        res.status(201).send({
+        return res.status(201).send({
             message: "Court Category add successfully",
             data: courtCategoryCreated,
         });
     } catch (err) {
         console.log("#### error while Court Category create #### ", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message: "Internal server error while creating Court Category",
         });
     }
@@ -682,10 +682,10 @@ exports.getCaseCategory = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -697,10 +697,10 @@ exports.getCaseCategoryId = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -715,10 +715,10 @@ exports.updateCaseCategory = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "updated", data: data });
+        return res.status(200).send({ msg: "updated", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -730,10 +730,10 @@ exports.deleteCaseCategory = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "deleted", data: data });
+        return res.status(200).send({ msg: "deleted", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error",
             error: err.message,
         });
@@ -742,10 +742,10 @@ exports.deleteCaseCategory = async (req, res) => {
 exports.createCase = async (req, res) => {
     try {
         const result = await caseModel.create(req.body);
-        res.status(200).send({ msg: "Cases added", data: result });
+        return res.status(200).send({ msg: "Cases added", data: result });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -763,10 +763,10 @@ exports.updateCase = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "updated", data: data });
+        return res.status(200).send({ msg: "updated", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -779,23 +779,23 @@ exports.getCase = async (req, res) => {
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
-            res.status(200).send({ data: data });
+            return res.status(200).send({ data: data });
         } if (req.Params.caseStatus != (null || undefined)) {
             const data = await caseModel.find({ caseStatus: req.Params.caseStatus });
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
-            res.status(200).send({ data: data });
+            return res.status(200).send({ data: data });
         } else {
             const data = await caseModel.find();
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
-            res.status(200).send({ data: data });
+            return res.status(200).send({ data: data });
         }
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -807,10 +807,10 @@ exports.getIdCase = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -822,10 +822,10 @@ exports.deleteCase = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "deleted", data: data });
+        return res.status(200).send({ msg: "deleted", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error",
             error: err.message,
         });
@@ -835,10 +835,10 @@ exports.createCourt = async (req, res) => {
     try {
         const court = { name: req.body.name, courtCategoryId: req.body.courtCategoryId };
         const courtCreated = await Court.create(court);
-        res.status(201).send({ message: "Court add successfully", data: courtCreated });
+        return res.status(201).send({ message: "Court add successfully", data: courtCreated });
     } catch (err) {
         console.log("#### error while Court create #### ", err.message);
-        res.status(500).send({
+        return res.status(500).send({
             message: "Internal server error while creating Court",
         });
     }
@@ -849,10 +849,10 @@ exports.getCourt = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -864,10 +864,10 @@ exports.getCourtId = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -879,10 +879,10 @@ exports.updateCourt = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "updated", data: data });
+        return res.status(200).send({ msg: "updated", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -894,10 +894,10 @@ exports.deleteCourt = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ msg: "deleted", data: data });
+        return res.status(200).send({ msg: "deleted", data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error",
             error: err.message,
         });
@@ -915,29 +915,29 @@ exports.addContactDetails = async (req, res) => {
             req.body.whatAppchatDescription = req.body.whatAppchatDescription || findContact.whatAppchatDescription;
             let updateContact = await ContactDetail.findByIdAndUpdate({ _id: findContact._id }, { $set: req.body }, { new: true });
             if (updateContact) {
-                res.status(200).send({ status: 200, message: "Contact Detail update successfully", data: updateContact });
+                return res.status(200).send({ status: 200, message: "Contact Detail update successfully", data: updateContact });
             }
         } else {
             let result2 = await ContactDetail.create(req.body);
             if (result2) {
-                res.status(200).send({ status: 200, message: "Contact Detail update successfully", data: result2 });
+                return res.status(200).send({ status: 200, message: "Contact Detail update successfully", data: result2 });
             }
         }
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({ status: 500, msg: "internal server error", error: err.message, });
+        return res.status(500).send({ status: 500, msg: "internal server error", error: err.message, });
     }
 };
 exports.viewContactDetails = async (req, res) => {
     try {
         let findcontactDetails = await ContactDetail.findOne();
         if (!findcontactDetails) {
-            res.status(404).send({ status: 404, message: "Contact Detail not found.", data: {} });
+            return res.status(404).send({ status: 404, message: "Contact Detail not found.", data: {} });
         } else {
-            res.status(200).send({ status: 200, message: "Contact Detail fetch successfully", data: findcontactDetails });
+            return res.status(200).send({ status: 200, message: "Contact Detail fetch successfully", data: findcontactDetails });
         }
     } catch (err) {
         console.log(err);
-        res.status(500).send({ status: 500, msg: "internal server error", error: err.message, });
+        return res.status(500).send({ status: 500, msg: "internal server error", error: err.message, });
     }
 };

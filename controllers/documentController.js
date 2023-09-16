@@ -11,15 +11,15 @@ exports.AddDocument = async (req, res) => {
             if (Data) {
                 let update = await caseModel.findByIdAndUpdate({ _id: cases._id }, { $push: { notes: Data._id } }, { new: true });
                 if (update) {
-                    res.status(200).json({ message: "Document is Addded ", data: Data, });
+                    return res.status(200).json({ message: "Document is Addded ", data: Data, });
                 }
             }
         } else {
-            res.status(404).json({ message: "Case not found", data: {} });
+            return res.status(404).json({ message: "Case not found", data: {} });
         }
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message,
         });
     }
@@ -27,10 +27,10 @@ exports.AddDocument = async (req, res) => {
 exports.getDocument = async (req, res) => {
     try {
         const FindDocument = await userDocuments.find({ $and: [{ $or: [{ userId: req.user.id }, { lawyerId: req.user.id }] }] });
-        res.status(200).json({ message: "All Document", data: FindDocument });
+        return res.status(200).json({ message: "All Document", data: FindDocument });
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message,
         });
     }
@@ -38,10 +38,10 @@ exports.getDocument = async (req, res) => {
 exports.getBycaseId = async (req, res) => {
     try {
         const findDocument = await userDocuments.find({ casesId: req.params.caseId });
-        res.status(200).json({ message: "Document found.", data: findDocument, });
+        return res.status(200).json({ message: "Document found.", data: findDocument, });
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message,
         });
     }
@@ -49,10 +49,10 @@ exports.getBycaseId = async (req, res) => {
 exports.getById = async (req, res) => {
     try {
         const findDocument = await userDocuments.findById({ _id: req.params.id });
-        res.status(200).json({ message: "Document found.", data: findDocument, });
+        return res.status(200).json({ message: "Document found.", data: findDocument, });
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message,
         });
     }
@@ -64,10 +64,10 @@ exports.getById = async (req, res) => {
 exports.getAllDocument = async (req, res) => {
     try {
         const FindDocument = await userDocuments.find({});
-        res.status(200).json({ message: "All Document", data: FindDocument });
+        return res.status(200).json({ message: "All Document", data: FindDocument });
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message,
         });
     }
@@ -75,11 +75,11 @@ exports.getAllDocument = async (req, res) => {
 exports.DeleteDocument = async (req, res) => {
     try {
         const Document = await userDocuments.findByIdAndDelete({ _id: req.params.id });
-        res.status(200).json({
+        return res.status(200).json({
             message: "Delete Document ",
         });
     } catch (err) {
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message,
         });
     }

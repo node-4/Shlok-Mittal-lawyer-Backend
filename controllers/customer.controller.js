@@ -24,16 +24,16 @@ exports.registration = async (req, res) => {
             req.body.refferalCode = await reffralCode();
             console.log(req.body);
             const userCreate = await User.create(req.body);
-            res.status(200).send({
+            return res.status(200).send({
                 message: "registered successfully ",
                 data: userCreate,
             });
         } else {
-            res.status(409).send({ message: "Already Exist", data: [] });
+            return res.status(409).send({ message: "Already Exist", data: [] });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 };
 exports.loginWithPhone = async (req, res) => {
@@ -54,10 +54,10 @@ exports.loginWithPhone = async (req, res) => {
         const updated = await User.findOneAndUpdate({ phone: phone }, userObj, {
             new: true,
         });
-        res.status(200).send({ userId: updated._id, otp: updated.otp });
+        return res.status(200).send({ userId: updated._id, otp: updated.otp });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 };
 exports.signin = async (req, res) => {
@@ -76,10 +76,10 @@ exports.signin = async (req, res) => {
         const accessToken = jwt.sign({ id: user._id }, authConfig.secret, {
             expiresIn: authConfig.accessTokenTime,
         });
-        res.status(201).send({ data: user, accessToken: accessToken });
+        return res.status(201).send({ data: user, accessToken: accessToken });
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: "Server error" + error.message });
+        return res.status(500).send({ message: "Server error" + error.message });
     }
 };
 exports.getProfile = async (req, res) => {
@@ -91,7 +91,7 @@ exports.getProfile = async (req, res) => {
             return res.status(404).json({ message: "No data found", data: {} });
         }
     } catch (error) {
-        res.status(501).send({ message: "server error.", data: {}, });
+        return res.status(501).send({ message: "server error.", data: {}, });
     }
 };
 exports.verifyOtp = async (req, res) => {
@@ -112,13 +112,13 @@ exports.verifyOtp = async (req, res) => {
         const accessToken = jwt.sign({ id: user._id }, authConfig.secret, {
             expiresIn: authConfig.accessTokenTime,
         });
-        res.status(200).send({
+        return res.status(200).send({
             message: "logged in successfully",
             accessToken: accessToken,
         });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({ error: "internal server error" + err.message });
+        return res.status(500).send({ error: "internal server error" + err.message });
     }
 };
 exports.resendOTP = async (req, res) => {
@@ -139,10 +139,10 @@ exports.resendOTP = async (req, res) => {
             { otp, otpExpiration },
             { new: true }
         );
-        res.status(200).send({ message: "OTP resent", otp: otp });
+        return res.status(200).send({ message: "OTP resent", otp: otp });
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: "Server error" + error.message });
+        return res.status(500).send({ message: "Server error" + error.message });
     }
 };
 exports.resetPassword = async (req, res) => {
@@ -158,19 +158,19 @@ exports.resetPassword = async (req, res) => {
                 { $set: { password: bcrypt.hashSync(req.body.newPassword) } },
                 { new: true }
             );
-            res.status(200).send({
+            return res.status(200).send({
                 message: "Password update successfully.",
                 data: updated,
             });
         } else {
-            res.status(501).send({
+            return res.status(501).send({
                 message: "Password Not matched.",
                 data: {},
             });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: "Server error" + error.message });
+        return res.status(500).send({ message: "Server error" + error.message });
     }
 };
 exports.update = async (req, res) => {
@@ -201,10 +201,10 @@ exports.update = async (req, res) => {
         }
         console.log(obj);
         let updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true })
-        res.status(200).send({ message: "updated", data: updated });
+        return res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
         console.log(err);
-        res.status(500).send({
+        return res.status(500).send({
             message: "internal server error " + err.message,
         });
     }
@@ -245,7 +245,7 @@ exports.SaveDocument = async (req, res) => {
             _id: req.params.id,
         });
         if (!findDocument) {
-            res.status(404).send({ message: "Document not found.", data: {} });
+            return res.status(404).send({ message: "Document not found.", data: {} });
         } else {
             const usersDocument = await saveDocuments.findOne({
                 userId: req.user._id,
@@ -275,7 +275,7 @@ exports.SaveDocument = async (req, res) => {
             }
         }
     } catch (error) {
-        res.status(501).send({
+        return res.status(501).send({
             message: "server error.",
             data: {},
         });
@@ -312,11 +312,11 @@ exports.createAppointment = async (req, res) => {
             const Data = await appointment.create(data);
             return res.status(200).json(Data);
         } else {
-            res.status(404).send({ message: "Document not found.", data: {} });
+            return res.status(404).send({ message: "Document not found.", data: {} });
         }
     } catch (error) {
         console.log(error);
-        res.status(501).send({
+        return res.status(501).send({
             message: "server error.",
             data: {},
         });
@@ -362,11 +362,11 @@ exports.instantAppointment = async (req, res) => {
                 return res.status(200).json(update);
             }
         } else {
-            res.status(404).send({ message: "Document not found.", data: {} });
+            return res.status(404).send({ message: "Document not found.", data: {} });
         }
     } catch (error) {
         console.log(error);
-        res.status(501).send({
+        return res.status(501).send({
             message: "server error.",
             data: {},
         });
@@ -379,15 +379,15 @@ exports.cancelAppointment = async (req, res) => {
             const FindAppointment = await appointment.findById({ _id: req.params.id });
             if (FindAppointment) {
                 const Data = await appointment.findByIdAndUpdate({ _id: FindAppointment._id }, { $set: { appointmentStatus: "Cancel" } }, { new: true });
-                res.status(200).json({ message: "Cancel appointment", data: Data });
+                return res.status(200).json({ message: "Cancel appointment", data: Data });
             }
             return res.status(200).json(Data);
         } else {
-            res.status(404).send({ message: "Document not found.", data: {} });
+            return res.status(404).send({ message: "Document not found.", data: {} });
         }
     } catch (error) {
         console.log(error);
-        res.status(501).send({
+        return res.status(501).send({
             message: "server error.",
             data: {},
         });
@@ -396,19 +396,19 @@ exports.cancelAppointment = async (req, res) => {
 exports.upcomingAppointment = async (req, res) => {
     try {
         const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Pending" }).populate('lawyer userId');
-        res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
+        return res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
     } catch (err) {
         console.log(err);
-        res.status(400).json({ message: err.message, });
+        return res.status(400).json({ message: err.message, });
     }
 };
 exports.allCancelAppointment = async (req, res) => {
     try {
         const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Cancel" }).populate('lawyer userId');
-        res.status(200).json({ message: "All Document", data: FindAppointment });
+        return res.status(200).json({ message: "All Document", data: FindAppointment });
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message,
         });
     }
@@ -416,10 +416,10 @@ exports.allCancelAppointment = async (req, res) => {
 exports.pastAppointment = async (req, res) => {
     try {
         const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Done" }).populate('lawyer userId');
-        res.status(200).json({ message: "All Document", data: FindAppointment });
+        return res.status(200).json({ message: "All Document", data: FindAppointment });
     } catch (err) {
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             message: err.message,
         });
     }
@@ -430,10 +430,10 @@ exports.getAllbill = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -465,11 +465,11 @@ exports.giveRating = async (req, res) => {
             await User.findByIdAndUpdate({ _id: findUser._id }, { $set: { rating: ratings } }, { new: true });
             return res.status(200).json(Data);
         } else {
-            res.status(404).send({ message: "Document not found.", data: {} });
+            return res.status(404).send({ message: "Document not found.", data: {} });
         }
     } catch (error) {
         console.log(error);
-        res.status(501).send({
+        return res.status(501).send({
             message: "server error.",
             data: {},
         });
@@ -481,10 +481,10 @@ exports.getCase = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
@@ -499,7 +499,7 @@ exports.getrefferalCode = async (req, res) => {
             return res.status(404).json({ message: "No data found", data: {} });
         }
     } catch (error) {
-        res.status(501).send({ message: "server error.", data: {}, });
+        return res.status(501).send({ message: "server error.", data: {}, });
     }
 };
 exports.getAllLawyer = async (req, res) => {
@@ -508,10 +508,10 @@ exports.getAllLawyer = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        res.status(200).send({ data: data });
+        return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        res.status(500).send({
+        return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
         });
