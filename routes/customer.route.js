@@ -34,6 +34,7 @@ module.exports = (app) => {
     app.post("/api/v1/customer/createAppointment", [authJwt.verifyToken], auth.createAppointment);
     app.post("/api/v1/customer/instant/Appointment", [authJwt.verifyToken], auth.instantAppointment);
     app.post("/api/v1/customer/cancelAppointment/:id", [authJwt.verifyToken], auth.cancelAppointment);
+    app.post("/api/v1/customer/appointmentFeedback/:id", [authJwt.verifyToken], auth.appointmentFeedback);
     app.get("/api/v1/customer/pastAppointment", [authJwt.verifyToken], auth.pastAppointment);
     app.get("/api/v1/customer/allCancelAppointment", [authJwt.verifyToken], auth.allCancelAppointment);
     app.get("/api/v1/customer/upcomingAppointment", [authJwt.verifyToken], auth.upcomingAppointment);

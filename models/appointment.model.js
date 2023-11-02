@@ -40,6 +40,15 @@ const casesSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
     }],
+    youfeel: {
+        type: String,
+    },
+    subject: {
+        type: String,
+    },
+    message: {
+        type: String,
+    },
 }, { timestamps: true });
 const cases = mongoose.model("appointments", casesSchema);
 module.exports = cases;

@@ -381,9 +381,8 @@ exports.cancelAppointment = async (req, res) => {
                 const Data = await appointment.findByIdAndUpdate({ _id: FindAppointment._id }, { $set: { appointmentStatus: "Cancel" } }, { new: true });
                 return res.status(200).json({ message: "Cancel appointment", data: Data });
             }
-            return res.status(200).json(Data);
         } else {
-            return res.status(404).send({ message: "Document not found.", data: {} });
+            return res.status(404).send({ message: "appointment not found.", data: {} });
         }
     } catch (error) {
         console.log(error);
@@ -391,6 +390,23 @@ exports.cancelAppointment = async (req, res) => {
             message: "server error.",
             data: {},
         });
+    }
+};
+exports.appointmentFeedback = async (req, res) => {
+    try {
+        const findUser = await User.findById({ _id: req.user._id });
+        if (findUser) {
+            const FindAppointment = await appointment.findById({ _id: req.params.id });
+            if (FindAppointment) {
+                const Data = await appointment.findByIdAndUpdate({ _id: FindAppointment._id }, { $set: { youfeel: req.body.youfeel, subject: req.body.subject, message: req.body.message, } }, { new: true });
+                return res.status(200).json({ message: "Appointment Feedback", data: Data });
+            }
+        } else {
+            return res.status(404).send({ message: "Document not found.", data: {} });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(501).send({ message: "server error.", data: {}, });
     }
 };
 exports.upcomingAppointment = async (req, res) => {
