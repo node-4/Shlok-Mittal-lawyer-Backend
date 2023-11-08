@@ -3,10 +3,24 @@ const auth = require("../controllers/admin.controller");
 const { authJwt, authorizeRoles } = require("../middlewares");
 var multer = require("multer");
 const path = require("path");
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => { cb(null, "uploads"); }, filename: (req, file, cb) => { cb(null, Date.now() + path.extname(file.originalname)); },
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
+cloudinary.config({
+    cloud_name: "dbrvq9uxa",
+    api_key: "567113285751718",
+    api_secret: "rjTsz9ksqzlDtsrlOPcTs_-QtW4",
+});
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "images/image",
+        allowed_formats: ["jpg", "jpeg", "png", "PNG", "xlsx", "xls", "pdf", "PDF"],
+    },
 });
 const upload = multer({ storage: storage });
+var cpUpload = upload.fields([{ name: 'barRegistrationImage', maxCount: 1 },
+{ name: 'barCertificateImage', maxCount: 1 },
+{ name: 'aadhar', maxCount: 1 }]);
 module.exports = (app) => {
     app.post("/api/v1/admin/registration", auth.registration);
     app.post("/api/v1/admin/login", auth.signin);
@@ -14,10 +28,10 @@ module.exports = (app) => {
     app.get("/api/v1/admin/dashboard", [authJwt.verifyToken], auth.dashboard);
     app.get("/api/v1/admin/users", [authJwt.verifyToken], auth.getUsers);
     app.get("/api/v1/admin/lawyer", [authJwt.verifyToken], auth.getLawyers);
-    app.post("/api/v1/createCategory", [authJwt.verifyToken], auth.createCategory);
+    app.post("/api/v1/createCategory", [authJwt.verifyToken], upload.single("image"), auth.createCategory);
     app.get("/api/v1/category", auth.getCategory);
     app.get("/api/v1/category/:id", auth.getCategoryId);
-    app.patch("/api/v1/category/:id", [authJwt.verifyToken], auth.updateCategory);
+    app.patch("/api/v1/category/:id", [authJwt.verifyToken], upload.single("image"), auth.updateCategory);
     app.delete("/api/v1/category/:id", [authJwt.verifyToken], auth.deleteCategory);
     app.post("/api/v1/admin/createDepartment", [authJwt.verifyToken], auth.createDepartment);
     app.post("/api/v1/admin/department", auth.getDepartment);
@@ -34,10 +48,10 @@ module.exports = (app) => {
     app.get("/api/v1/admin/location/:id", auth.getLocationId);
     app.patch("/api/v1/admin/location/:id", [authJwt.verifyToken], auth.updateLocation);
     app.delete("/api/v1/admin/location/:id", [authJwt.verifyToken], auth.deleteLocation);
-    app.post("/api/v1/admin/CreateLawyer", [authJwt.verifyToken], auth.CreateLawyer);
+    app.post("/api/v1/admin/CreateLawyer", [authJwt.verifyToken], cpUpload, auth.CreateLawyer);
     app.put("/api/v1/admin/updateLawyer/:id", [authJwt.verifyToken], auth.updateLawyer);
     app.delete("/api/v1/admin/User/:id", [authJwt.verifyToken], auth.deleteUser);
-    app.post('/api/v1/admin/CreateBanner', auth.AddBanner);
+    app.post('/api/v1/admin/CreateBanner', upload.single("image"), auth.AddBanner);
     app.get('/api/v1/admin/AllBanner', auth.getBanner);
     app.get('/api/v1/admin/banner/:id', auth.getByIdBanner);
     app.delete('/api/v1/admin/delete/:id', auth.DeleteBanner);

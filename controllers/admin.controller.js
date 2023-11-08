@@ -101,11 +101,11 @@ exports.dashboard = async (req, res) => {
 };
 exports.getLawyers = async (req, res) => {
     try {
-        const findLawyer = await User.find({ userType: "LAWYER" });
+        const findLawyer = await User.find({ userType: "LAWYER" }).populate('categoryId');
         if (findLawyer.length === 0) {
             return res.status(404).json({ message: "Lawyer not found" });
         }
-        return res.status(200).json(findLawyer);
+        return res.status(200).json({ status: 200, message: "Lawyer  found", data: findLawyer });
     } catch (err) {
         console.log(err.message);
         return res.status(500).json({
@@ -131,16 +131,36 @@ exports.getUsers = async (req, res) => {
 };
 exports.createCategory = async (req, res) => {
     try {
-        const category = { name: req.body.name, image: req.body.image, };
-        const categoryCreated = await Category.create(category);
-        console.log(`#### Category add successfully #### /n ${categoryCreated} `);
-        return res.status(201).send({ message: "Category add successfully", data: categoryCreated, });
-    } catch (err) {
-        console.log("#### error while Category create #### ", err.message);
-        return res.status(500).send({
-            message: "Internal server error while creating category",
-        });
+        let findCategory = await Category.findOne({ name: req.body.name });
+        if (findCategory) {
+            return res.status(409).json({ message: "Category already exit.", status: 404, data: {} });
+        } else {
+            let fileUrl;
+            if (req.file) {
+                fileUrl = req.file ? req.file.path : "";
+            }
+            const data = { name: req.body.name, image: fileUrl };
+            const category = await Category.create(data);
+            return res.status(200).json({ message: "Category add successfully.", status: 200, data: category });
+        }
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "internal server error ", data: error.message, });
     }
+};
+exports.updateCategory = async (req, res) => {
+    const { id } = req.params;
+    const category = await Category.findById(id);
+    if (!category) {
+        return res.status(404).json({ message: "Category Not Found", status: 404, data: {} });
+    }
+    let fileUrl;
+    if (req.file) {
+        fileUrl = req.file ? req.file.path : "";
+    }
+    category.image = fileUrl || category.image;
+    category.name = req.body.name || category.name;
+    let update = await category.save();
+    return res.status(200).json({ message: "Updated Successfully", data: update });
 };
 exports.getCategory = async (req, res) => {
     try {
@@ -167,18 +187,6 @@ exports.getCategoryId = async (req, res) => {
             msg: "internal server error ",
             error: err.message,
         });
-    }
-};
-exports.updateCategory = async (req, res) => {
-    try {
-        const data = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true, });
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ msg: "updated", data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.deleteCategory = async (req, res) => {
@@ -287,10 +295,7 @@ exports.createService = async (req, res) => {
     try {
         const service = { userId: req.user._id, name: req.body.name };
         const serviceCreated = await Service.create(service);
-        return res.status(201).send({
-            message: "Service add successfully",
-            data: serviceCreated,
-        });
+        return res.status(201).send({ message: "Service add successfully", data: serviceCreated, });
     } catch (err) {
         console.log("#### error while Category create #### ", err.message);
         return res.status(500).send({
@@ -452,18 +457,19 @@ exports.deleteLocation = async (req, res) => {
 exports.CreateLawyer = async (req, res) => {
     const { phone, email } = req.body;
     try {
-        req.body.email = email.split(" ").join("").toLowerCase();
-        let user = await User.findOne({
-            $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }],
-        });
+        let user = await User.findOne({ $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }], userType: "LAWYER", });
         if (!user) {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
             req.body.userType = "LAWYER";
+            req.body.refferalCode = await reffralCode();
+            let barRegist = req.files['barRegistrationImage'];
+            let barCert = req.files['barCertificateImage'];
+            let aad = req.files['aadhar'];
+            req.body.barRegistrationImage = barRegist[0].path;
+            req.body.barCertificateImage = barCert[0].path;
+            req.body.aadhar = aad[0].path;
             const userCreate = await User.create(req.body);
-            return res.status(200).send({
-                message: "registered successfully ",
-                data: userCreate,
-            });
+            return res.status(200).send({ message: "registered successfully ", data: userCreate, });
         } else {
             return res.status(409).send({ message: "Already Exist", data: [] });
         }
@@ -527,8 +533,12 @@ exports.deleteUser = async (req, res) => {
 };
 exports.AddBanner = async (req, res) => {
     try {
+        let fileUrl;
+        if (req.file) {
+            fileUrl = req.file ? req.file.path : "";
+        }
         const data = {
-            image: req.body.image,
+            image: fileUrl,
             desc: req.body.desc
         }
         const Data = await banner.create(data);
@@ -775,13 +785,13 @@ exports.updateCase = async (req, res) => {
 exports.getCase = async (req, res) => {
     try {
         if (req.Params.lawyer != (null || undefined)) {
-            const data = await caseModel.find({ lawyer: req.Params.lawyer });
+            const data = await caseModel.find({ lawyer: req.Params.lawyer }).populate('lawyer userId');
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
             return res.status(200).send({ data: data });
         } if (req.Params.caseStatus != (null || undefined)) {
-            const data = await caseModel.find({ caseStatus: req.Params.caseStatus });
+            const data = await caseModel.find({ caseStatus: req.Params.caseStatus }).populate('lawyer userId');
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
@@ -803,7 +813,7 @@ exports.getCase = async (req, res) => {
 };
 exports.getIdCase = async (req, res) => {
     try {
-        const data = await caseModel.findById(req.params.id);
+        const data = await caseModel.findById(req.params.id).populate('lawyer userId');
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
