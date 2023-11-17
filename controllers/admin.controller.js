@@ -784,14 +784,14 @@ exports.updateCase = async (req, res) => {
 };
 exports.getCase = async (req, res) => {
     try {
-        if (req.Params.lawyer != (null || undefined)) {
-            const data = await caseModel.find({ lawyer: req.Params.lawyer }).populate('lawyer userId');
+        if (req.query.lawyer != (null || undefined)) {
+            const data = await caseModel.find({ lawyer: req.query.lawyer }).populate('lawyer userId');
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
             return res.status(200).send({ data: data });
-        } if (req.Params.caseStatus != (null || undefined)) {
-            const data = await caseModel.find({ caseStatus: req.Params.caseStatus }).populate('lawyer userId');
+        } if (req.query.caseStatus != (null || undefined)) {
+            const data = await caseModel.find({ caseStatus: req.query.caseStatus }).populate('lawyer userId');
             if (!data || data.length === 0) {
                 return res.status(400).send({ msg: "not found" });
             }
@@ -804,7 +804,7 @@ exports.getCase = async (req, res) => {
             return res.status(200).send({ data: data });
         }
     } catch (err) {
-        console.log(err.message);
+        console.log(err);
         return res.status(500).send({
             msg: "internal server error ",
             error: err.message,
