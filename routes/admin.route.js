@@ -39,7 +39,7 @@ module.exports = (app) => {
     app.patch("/api/v1/admin/department/:id", [authJwt.verifyToken], auth.updateDepartment);
     app.delete("/api/v1/admin/department/:id", [authJwt.verifyToken], auth.deleteDepartment);
     app.post("/api/v1/admin/createService", [authJwt.verifyToken], auth.createService);
-    app.post("/api/v1/admin/service", auth.getService);
+    app.get("/api/v1/admin/service", auth.getService);
     app.get("/api/v1/admin/service/:id", auth.getServiceId);
     app.patch("/api/v1/admin/service/:id", [authJwt.verifyToken], auth.updateService);
     app.delete("/api/v1/admin/service/:id", [authJwt.verifyToken], auth.deleteService);

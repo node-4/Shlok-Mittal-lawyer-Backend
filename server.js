@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 if (process.env.NODE_ENV == "production") {
-    console.log = function () {};
+    console.log = function () { };
 }
 //console.log = function () {};
 app.get("/", (req, res) => {
@@ -39,4 +39,6 @@ app.listen(process.env.PORT, () => {
     console.log(`Listening on port ${process.env.PORT}!`);
 });
 
-module.exports = { handler: serverless(app) };
+
+module.exports = app;
+module.exports.handler = serverless(app);
