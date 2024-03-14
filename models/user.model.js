@@ -141,6 +141,10 @@ var userSchema = new schema(
             type: Number,
             default: 0,
         },
+        totalConsultancy: {
+            type: Number,
+            default: 0,
+        },
         experiance: {
             type: String,
             default: "",

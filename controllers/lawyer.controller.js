@@ -409,10 +409,7 @@ exports.createAppointment = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        return res.status(501).send({
-            message: "server error.",
-            data: {},
-        });
+        return res.status(501).send({ message: "server error.", data: {}, });
     }
 };
 exports.upcomingAppointment = async (req, res) => {
