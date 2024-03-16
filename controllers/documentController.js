@@ -6,7 +6,11 @@ exports.AddDocument = async (req, res) => {
         console.log(req.body.caseId);
         const cases = await caseModel.findById({ _id: req.body.caseId });
         if (cases) {
-            const data = { casesId: cases._id, userId: cases.userId, lawyerId: cases.lawyer, desc: req.body.desc, };
+            let image = null;
+            if (req.file) {
+                image = req.file.path
+            }
+            const data = { casesId: cases._id, userId: cases.userId, lawyerId: cases.lawyer, image: image, desc: req.body.desc, };
             const Data = await userDocuments.create(data);
             if (Data) {
                 let update = await caseModel.findByIdAndUpdate({ _id: cases._id }, { $push: { notes: Data._id } }, { new: true });
@@ -57,10 +61,6 @@ exports.getById = async (req, res) => {
         });
     }
 };
-
-
-
-
 exports.getAllDocument = async (req, res) => {
     try {
         const FindDocument = await userDocuments.find({});

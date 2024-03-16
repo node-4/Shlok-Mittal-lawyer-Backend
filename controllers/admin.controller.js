@@ -16,6 +16,7 @@ const banner = require('../models/banner.model');
 const CourtCategory = require("../models/courtCategory.model");
 const Court = require("../models/court.model");
 const ContactDetail = require("../models/ContactDetail");
+const appointment = require("../models/appointment.model");
 exports.registration = async (req, res) => {
     const { phone, email } = req.body;
     try {
@@ -87,9 +88,17 @@ exports.dashboard = async (req, res) => {
     try {
         let totalUser = await userModel.find({ userType: "CUSTOMER" }).count();
         let totalLawyer = await userModel.find({ userType: "LAWYER" }).count();
+        const totalDepartment = await Department.find().count();
+        const totalService = await Service.find().count();
+        const totalCases = await caseModel.find({}).count();
+        const totalBooking = await appointment.find({}).count();
         let obj = {
             totalUser: totalUser,
             totalLawyer: totalLawyer,
+            totalBooking: totalBooking,
+            totalCases: totalCases,
+            totalService: totalService,
+            totalDepartment: totalDepartment,
         };
         return res.status(200).send({ message: "Data found successfully", data: obj });
     } catch (err) {
@@ -114,6 +123,85 @@ exports.getLawyers = async (req, res) => {
         });
     }
 };
+exports.CreateLawyer = async (req, res) => {
+    const { phone, email } = req.body;
+    try {
+        let user = await User.findOne({ $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }], userType: "LAWYER", });
+        if (!user) {
+            req.body.password = bcrypt.hashSync(req.body.password, 8);
+            req.body.userType = "LAWYER";
+            req.body.refferalCode = await reffralCode();
+            let barRegist = req.files['barRegistrationImage'];
+            let barCert = req.files['barCertificateImage'];
+            let aad = req.files['aadhar'];
+            req.body.barRegistrationImage = barRegist[0].path;
+            req.body.barCertificateImage = barCert[0].path;
+            req.body.aadhar = aad[0].path;
+            const userCreate = await User.create(req.body);
+            return res.status(200).send({ message: "registered successfully ", data: userCreate, });
+        } else {
+            return res.status(409).send({ message: "Already Exist", data: [] });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+exports.updateLawyer = async (req, res) => {
+    try {
+        const { name, email, phone, password, bio, hearingFee, image, experiance, languages, } = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).send({ message: "not found" });
+        }
+        user.name = name || user.name;
+        user.email = email || user.email;
+        user.phone = phone || user.phone;
+        user.image = image || user.image;
+        user.bio = bio || user.bio;
+        user.hearingFee = hearingFee || user.hearingFee;
+        user.experiance = experiance || user.experiance;
+        user.languages = languages || user.languages;
+        if (req.body.password) {
+            user.password = bcrypt.hashSync(password, 8) || user.password;
+        }
+        const updated = await user.save();
+        // console.log(updated);
+        return res.status(200).send({ message: "updated", data: updated });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({
+            message: "internal server error " + err.message,
+        });
+    }
+};
+exports.deleteUser = async (req, res) => {
+    try {
+        const data = await User.findByIdAndDelete(req.params.id);
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ msg: "deleted", data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error",
+            error: err.message,
+        });
+    }
+};
+exports.getUserById = async (req, res) => {
+    try {
+        const data = await User.findById({ _id: req.params.id });
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
+    }
+};
 exports.getUsers = async (req, res) => {
     try {
         const findLawyer = await User.find({ userType: "CUSTOMER" });
@@ -125,6 +213,195 @@ exports.getUsers = async (req, res) => {
         console.log(err.message);
         return res.status(500).json({
             message: "server error while getting lawyer",
+            error: err.message,
+        });
+    }
+};
+exports.updateUser = async (req, res) => {
+    try {
+        const { firstName, lastName, email, phone, kyc, whatAppNotification, image, blogNotification, } = req.body;
+        const user = await User.findById({ _id: req.params.id });
+        if (!user) {
+            return res.status(404).send({ message: "not found" });
+        }
+        let fileUrl;
+        if (req.file) {
+            fileUrl = req.file ? req.file.path : "";
+        }
+        let password;
+        if (req.body.password) {
+            password = bcrypt.hashSync(req.body.password, 8)
+        }
+        let obj = {
+            firstName: firstName || user.firstName,
+            lastName: lastName || user.lastName,
+            email: email || user.email,
+            phone: phone || user.phone,
+            image: fileUrl || user.image,
+            kyc: kyc || user.kyc,
+            whatAppNotification: whatAppNotification || user.whatAppNotification,
+            blogNotification: blogNotification || user.blogNotification,
+            password: password || user.password
+        }
+        console.log(obj);
+        let updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true })
+        return res.status(200).send({ message: "updated", data: updated });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ message: "internal server error " + err.message, });
+    }
+};
+exports.createCase = async (req, res) => {
+    try {
+        const result = await caseModel.create(req.body);
+        return res.status(200).send({ msg: "Cases added", data: result });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
+    }
+};
+exports.updateCase = async (req, res) => {
+    try {
+        const data = await caseModel.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true, });
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ msg: "updated", data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
+    }
+};
+exports.getCase = async (req, res) => {
+    try {
+        if (req.query.lawyer != (null || undefined)) {
+            const data = await caseModel.find({ lawyer: req.query.lawyer }).populate('lawyer userId');
+            if (!data || data.length === 0) {
+                return res.status(400).send({ msg: "not found" });
+            }
+            return res.status(200).send({ data: data });
+        } if (req.query.caseStatus != (null || undefined)) {
+            const data = await caseModel.find({ caseStatus: req.query.caseStatus }).populate('lawyer userId');
+            if (!data || data.length === 0) {
+                return res.status(400).send({ msg: "not found" });
+            }
+            return res.status(200).send({ data: data });
+        } else {
+            const data = await caseModel.find();
+            if (!data || data.length === 0) {
+                return res.status(400).send({ msg: "not found" });
+            }
+            return res.status(200).send({ data: data });
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
+    }
+};
+exports.getIdCase = async (req, res) => {
+    try {
+        const data = await caseModel.findById(req.params.id).populate('lawyer userId');
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
+    }
+};
+exports.deleteCase = async (req, res) => {
+    try {
+        const data = await caseModel.findByIdAndDelete(req.params.id);
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ msg: "deleted", data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error",
+            error: err.message,
+        });
+    }
+};
+exports.createDepartment = async (req, res) => {
+    try {
+        const department = {
+            userId: req.user._id,
+            name: req.body.name,
+        };
+        const departmentCreated = await Department.create(department);
+        return res.status(201).send({ message: "Department add successfully", data: departmentCreated, });
+    } catch (err) {
+        console.log("#### error while Category create #### ", err.message);
+        return res.status(500).send({
+            message: "Internal server error while creating category",
+        });
+    }
+};
+exports.getDepartment = async (req, res) => {
+    try {
+        const data = await Department.find().populate({ path: "userId", select: "name", });
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: message,
+        })
+    }
+};
+exports.getDepartmentId = async (req, res) => {
+    try {
+        const data = await Department.findById(req.params.id);
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: message,
+        })
+    }
+};
+exports.updateDepartment = async (req, res) => {
+    try {
+        const data = await Department.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            {
+                new: true,
+            }
+        );
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ msg: "updated", data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: message,
+        })
+    }
+};
+exports.deleteDepartment = async (req, res) => {
+    try {
+        const data = await Department.findByIdAndDelete(req.params.id);
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ msg: "deleted", data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error",
             error: err.message,
         });
     }
@@ -185,340 +462,13 @@ exports.getCategoryId = async (req, res) => {
         console.log(err.message);
         return res.status(500).send({
             msg: "internal server error ",
-            error: err.message,
-        });
+            error: message,
+        })
     }
 };
 exports.deleteCategory = async (req, res) => {
     try {
         const data = await Category.findByIdAndDelete(req.params.id);
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ msg: "deleted", data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error",
-            error: err.message,
-        });
-    }
-};
-exports.createDepartment = async (req, res) => {
-    try {
-        const department = {
-            userId: req.user._id,
-            name: req.body.name,
-        };
-        const departmentCreated = await Department.create(department);
-        return res.status(201).send({
-            message: "Department add successfully",
-            data: departmentCreated,
-        });
-    } catch (err) {
-        console.log("#### error while Category create #### ", err.message);
-        return res.status(500).send({
-            message: "Internal server error while creating category",
-        });
-    }
-};
-exports.getDepartment = async (req, res) => {
-    try {
-        const data = await Department.find().populate({
-            path: "userId",
-            select: "name",
-        });
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.getDepartmentId = async (req, res) => {
-    try {
-        const data = await Department.findById(req.params.id);
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.updateDepartment = async (req, res) => {
-    try {
-        const data = await Department.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-            }
-        );
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ msg: "updated", data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.deleteDepartment = async (req, res) => {
-    try {
-        const data = await Department.findByIdAndDelete(req.params.id);
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ msg: "deleted", data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error",
-            error: err.message,
-        });
-    }
-};
-exports.createService = async (req, res) => {
-    try {
-        const service = { userId: req.user._id, name: req.body.name };
-        const serviceCreated = await Service.create(service);
-        return res.status(201).send({ message: "Service add successfully", data: serviceCreated, });
-    } catch (err) {
-        console.log("#### error while Category create #### ", err.message);
-        return res.status(500).send({
-            message: "Internal server error while creating category",
-        });
-    }
-};
-exports.getService = async (req, res) => {
-    try {
-        const data = await Service.find().populate({
-            path: "userId",
-            select: "name",
-        });
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.getServiceId = async (req, res) => {
-    try {
-        const data = await Service.findById(req.params.id);
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.updateService = async (req, res) => {
-    try {
-        const data = await Service.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-        });
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ msg: "updated", data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.deleteService = async (req, res) => {
-    try {
-        const data = await Service.findByIdAndDelete(req.params.id);
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ msg: "deleted", data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error",
-            error: err.message,
-        });
-    }
-};
-exports.createLocation = async (req, res) => {
-    try {
-        const location = {
-            userId: req.user._id,
-            address: req.body.name,
-            state: req.body.state,
-            distract: req.body.distract,
-            code: req.body.code,
-        };
-        const locationCreated = await Location.create(location);
-        return res.status(201).send({
-            message: "Location add successfully",
-            data: locationCreated,
-        });
-    } catch (err) {
-        console.log("#### error while Category create #### ", err.message);
-        return res.status(500).send({
-            message: "Internal server error while creating category",
-        });
-    }
-};
-exports.getLocation = async (req, res) => {
-    try {
-        const data = await Location.find().populate({
-            path: "userId",
-            select: "name",
-        });
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.getLocationId = async (req, res) => {
-    try {
-        const data = await Location.findById(req.params.id);
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.updateLocation = async (req, res) => {
-    try {
-        const data = await Location.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-        });
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ msg: "updated", data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.deleteLocation = async (req, res) => {
-    try {
-        const data = await Location.findByIdAndDelete(req.params.id);
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ msg: "deleted", data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error",
-            error: err.message,
-        });
-    }
-};
-exports.CreateLawyer = async (req, res) => {
-    const { phone, email } = req.body;
-    try {
-        let user = await User.findOne({ $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }], userType: "LAWYER", });
-        if (!user) {
-            req.body.password = bcrypt.hashSync(req.body.password, 8);
-            req.body.userType = "LAWYER";
-            req.body.refferalCode = await reffralCode();
-            let barRegist = req.files['barRegistrationImage'];
-            let barCert = req.files['barCertificateImage'];
-            let aad = req.files['aadhar'];
-            req.body.barRegistrationImage = barRegist[0].path;
-            req.body.barCertificateImage = barCert[0].path;
-            req.body.aadhar = aad[0].path;
-            const userCreate = await User.create(req.body);
-            return res.status(200).send({ message: "registered successfully ", data: userCreate, });
-        } else {
-            return res.status(409).send({ message: "Already Exist", data: [] });
-        }
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Server error" });
-    }
-};
-exports.updateLawyer = async (req, res) => {
-    try {
-        const {
-            name,
-            email,
-            phone,
-            password,
-            bio,
-            hearingFee,
-            image,
-            experiance,
-            languages,
-        } = req.body;
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).send({ message: "not found" });
-        }
-        user.name = name || user.name;
-        user.email = email || user.email;
-        user.phone = phone || user.phone;
-        user.image = image || user.image;
-        user.bio = bio || user.bio;
-        user.hearingFee = hearingFee || user.hearingFee;
-        user.experiance = experiance || user.experiance;
-        user.languages = languages || user.languages;
-        if (req.body.password) {
-            user.password = bcrypt.hashSync(password, 8) || user.password;
-        }
-        const updated = await user.save();
-        // console.log(updated);
-        return res.status(200).send({ message: "updated", data: updated });
-    } catch (err) {
-        console.log(err);
-        return res.status(500).send({
-            message: "internal server error " + err.message,
-        });
-    }
-};
-exports.deleteUser = async (req, res) => {
-    try {
-        const data = await User.findByIdAndDelete(req.params.id);
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -593,6 +543,7 @@ exports.DeleteBanner = async (req, res) => {
         })
     }
 };
+
 exports.createCourtCategory = async (req, res) => {
     try {
         const courtCategory = { name: req.body.name, type: "Court" };
@@ -619,8 +570,8 @@ exports.getCourtCategory = async (req, res) => {
         console.log(err.message);
         return res.status(500).send({
             msg: "internal server error ",
-            error: err.message,
-        });
+            error: message,
+        })
     }
 };
 exports.getCourtCategoryId = async (req, res) => {
@@ -634,8 +585,8 @@ exports.getCourtCategoryId = async (req, res) => {
         console.log(err.message);
         return res.status(500).send({
             msg: "internal server error ",
-            error: err.message,
-        });
+            error: message,
+        })
     }
 };
 exports.updateCourtCategory = async (req, res) => {
@@ -652,8 +603,8 @@ exports.updateCourtCategory = async (req, res) => {
         console.log(err.message);
         return res.status(500).send({
             msg: "internal server error ",
-            error: err.message,
-        });
+            error: message,
+        })
     }
 };
 exports.deleteCourtCategory = async (req, res) => {
@@ -697,8 +648,8 @@ exports.getCaseCategory = async (req, res) => {
         console.log(err.message);
         return res.status(500).send({
             msg: "internal server error ",
-            error: err.message,
-        });
+            error: message,
+        })
     }
 };
 exports.getCaseCategoryId = async (req, res) => {
@@ -712,8 +663,8 @@ exports.getCaseCategoryId = async (req, res) => {
         console.log(err.message);
         return res.status(500).send({
             msg: "internal server error ",
-            error: err.message,
-        });
+            error: message,
+        })
     }
 };
 exports.updateCaseCategory = async (req, res) => {
@@ -730,105 +681,13 @@ exports.updateCaseCategory = async (req, res) => {
         console.log(err.message);
         return res.status(500).send({
             msg: "internal server error ",
-            error: err.message,
-        });
+            error: message,
+        })
     }
 };
 exports.deleteCaseCategory = async (req, res) => {
     try {
         const data = await CourtCategory.findByIdAndDelete({ _id: req.params.id, type: "Case" });
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ msg: "deleted", data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error",
-            error: err.message,
-        });
-    }
-};
-exports.createCase = async (req, res) => {
-    try {
-        const result = await caseModel.create(req.body);
-        return res.status(200).send({ msg: "Cases added", data: result });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.updateCase = async (req, res) => {
-    try {
-        const data = await caseModel.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-            }
-        );
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ msg: "updated", data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.getCase = async (req, res) => {
-    try {
-        if (req.query.lawyer != (null || undefined)) {
-            const data = await caseModel.find({ lawyer: req.query.lawyer }).populate('lawyer userId');
-            if (!data || data.length === 0) {
-                return res.status(400).send({ msg: "not found" });
-            }
-            return res.status(200).send({ data: data });
-        } if (req.query.caseStatus != (null || undefined)) {
-            const data = await caseModel.find({ caseStatus: req.query.caseStatus }).populate('lawyer userId');
-            if (!data || data.length === 0) {
-                return res.status(400).send({ msg: "not found" });
-            }
-            return res.status(200).send({ data: data });
-        } else {
-            const data = await caseModel.find();
-            if (!data || data.length === 0) {
-                return res.status(400).send({ msg: "not found" });
-            }
-            return res.status(200).send({ data: data });
-        }
-    } catch (err) {
-        console.log(err);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.getIdCase = async (req, res) => {
-    try {
-        const data = await caseModel.findById(req.params.id).populate('lawyer userId');
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
-        }
-        return res.status(200).send({ data: data });
-    } catch (err) {
-        console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
-    }
-};
-exports.deleteCase = async (req, res) => {
-    try {
-        const data = await caseModel.findByIdAndDelete(req.params.id);
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -864,8 +723,8 @@ exports.getCourt = async (req, res) => {
         console.log(err.message);
         return res.status(500).send({
             msg: "internal server error ",
-            error: err.message,
-        });
+            error: message,
+        })
     }
 };
 exports.getCourtId = async (req, res) => {
@@ -879,8 +738,8 @@ exports.getCourtId = async (req, res) => {
         console.log(err.message);
         return res.status(500).send({
             msg: "internal server error ",
-            error: err.message,
-        });
+            error: message,
+        })
     }
 };
 exports.updateCourt = async (req, res) => {
@@ -894,13 +753,99 @@ exports.updateCourt = async (req, res) => {
         console.log(err.message);
         return res.status(500).send({
             msg: "internal server error ",
-            error: err.message,
-        });
+            error: message,
+        })
     }
 };
 exports.deleteCourt = async (req, res) => {
     try {
         const data = await Court.findByIdAndDelete({ _id: req.params.id });
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ msg: "deleted", data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error",
+            error: err.message,
+        });
+    }
+};
+exports.createLocation = async (req, res) => {
+    try {
+        const location = {
+            userId: req.user._id,
+            address: req.body.name,
+            state: req.body.state,
+            distract: req.body.distract,
+            code: req.body.code,
+        };
+        const locationCreated = await Location.create(location);
+        return res.status(201).send({
+            message: "Location add successfully",
+            data: locationCreated,
+        });
+    } catch (err) {
+        console.log("#### error while Category create #### ", err.message);
+        return res.status(500).send({
+            message: "Internal server error while creating category",
+        });
+    }
+};
+exports.getLocation = async (req, res) => {
+    try {
+        const data = await Location.find().populate({
+            path: "userId",
+            select: "name",
+        });
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: message,
+        })
+    }
+};
+exports.getLocationId = async (req, res) => {
+    try {
+        const data = await Location.findById(req.params.id);
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: message,
+        })
+    }
+};
+exports.updateLocation = async (req, res) => {
+    try {
+        const data = await Location.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+        });
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ msg: "updated", data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: message,
+        })
+    }
+};
+exports.deleteLocation = async (req, res) => {
+    try {
+        const data = await Location.findByIdAndDelete(req.params.id);
         if (!data) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -949,6 +894,127 @@ exports.viewContactDetails = async (req, res) => {
     } catch (err) {
         console.log(err);
         return res.status(500).send({ status: 500, msg: "internal server error", error: err.message, });
+    }
+};
+exports.upcomingAppointment = async (req, res) => {
+    try {
+        const FindAppointment = await appointment.find({ appointmentStatus: "Pending" }).populate('lawyer userId case');
+        return res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({ message: err.message, });
+    }
+};
+exports.allCancelAppointment = async (req, res) => {
+    try {
+        const FindAppointment = await appointment.find({ appointmentStatus: "Cancel" }).populate('lawyer userId case');
+        return res.status(200).json({ message: "All Document", data: FindAppointment });
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({
+            message: err.message,
+        });
+    }
+};
+exports.pastAppointment = async (req, res) => {
+    try {
+        const FindAppointment = await appointment.find({ appointmentStatus: "Done" }).populate('lawyer userId case');
+        return res.status(200).json({ message: "All Document", data: FindAppointment });
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({
+            message: err.message,
+        });
+    }
+};
+exports.getSaveDocument = async (req, res) => {
+    try {
+        const usersDocument = await saveDocuments.find({}).populate({ path: 'documents', populate: { path: 'id' } });
+        if (usersDocument.length === 0) {
+            return res.status(404).json({ message: "save Document not found" });
+        }
+        return res.status(200).json(usersDocument);
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).json({ message: "server error while getting lawyer", error: err.message, });
+    }
+}
+
+exports.createService = async (req, res) => {
+    try {
+        const service = { userId: req.user._id, name: req.body.name };
+        const serviceCreated = await Service.create(service);
+        return res.status(201).send({ message: "Service add successfully", data: serviceCreated, });
+    } catch (err) {
+        console.log("#### error while Category create #### ", err.message);
+        return res.status(500).send({
+            message: "Internal server error while creating category",
+        });
+    }
+};
+exports.getService = async (req, res) => {
+    try {
+        const data = await Service.find().populate({
+            path: "userId",
+            select: "name",
+        });
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: message,
+        })
+    }
+};
+exports.getServiceId = async (req, res) => {
+    try {
+        const data = await Service.findById(req.params.id);
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: message,
+        })
+    }
+};
+exports.updateService = async (req, res) => {
+    try {
+        const data = await Service.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+        });
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ msg: "updated", data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: message,
+        })
+    }
+};
+exports.deleteService = async (req, res) => {
+    try {
+        const data = await Service.findByIdAndDelete(req.params.id);
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ msg: "deleted", data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error",
+            error: err.message,
+        });
     }
 };
 const reffralCode = async () => {

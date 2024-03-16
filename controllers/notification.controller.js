@@ -1,6 +1,5 @@
 
 const Notification = require('../models/notification.model');
-// CREATE Notification
 exports.createNotification = async (req, res) => {
     try {
         const notification = await Notification.create({
@@ -14,7 +13,6 @@ exports.createNotification = async (req, res) => {
         return res.status(500).json({ message: 'Server Error' });
     }
 };
-// READ All Notifications
 exports.getById = async (req, res) => {
     try {
         const notification = await Notification.findById(req.params.id);
@@ -43,7 +41,6 @@ exports.getAllNotifications = async (req, res) => {
         return res.status(500).json({ message: 'Server Error' });
     }
 };
-// UPDATE Notification
 exports.updateNotification = async (req, res) => {
     try {
         const notification = await Notification.findByIdAndUpdate(req.params.id, {
@@ -61,7 +58,6 @@ exports.updateNotification = async (req, res) => {
         return res.status(500).json({ message: 'Server Error' });
     }
 };
-// DELETE Notification
 exports.deleteNotification = async (req, res) => {
     try {
         const notification = await Notification.findByIdAndDelete(req.params.id);

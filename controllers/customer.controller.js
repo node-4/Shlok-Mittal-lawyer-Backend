@@ -241,15 +241,11 @@ exports.getLawyersbyCategory = async (req, res) => {
 };
 exports.SaveDocument = async (req, res) => {
     try {
-        const findDocument = await userDocuments.findById({
-            _id: req.params.id,
-        });
+        const findDocument = await userDocuments.findById({ _id: req.params.id, });
         if (!findDocument) {
             return res.status(404).send({ message: "Document not found.", data: {} });
         } else {
-            const usersDocument = await saveDocuments.findOne({
-                userId: req.user._id,
-            });
+            const usersDocument = await saveDocuments.findOne({ userId: req.user._id, });
             if (usersDocument) {
                 let documents = [];
                 let obj = { id: findDocument._id };
@@ -257,14 +253,8 @@ exports.SaveDocument = async (req, res) => {
                 for (let i = 0; i < usersDocument.documents.length; i++) {
                     documents.push(usersDocument.documents[i]);
                 }
-                let update = await saveDocuments.findByIdAndUpdate(
-                    { _id: usersDocument._id },
-                    { $set: { documents: documents } },
-                    { new: true }
-                );
-                return res
-                    .status(200)
-                    .json({ message: "updated", data: update });
+                let update = await saveDocuments.findByIdAndUpdate({ _id: usersDocument._id }, { $set: { documents: documents } }, { new: true });
+                return res.status(200).json({ message: "updated", data: update });
             } else {
                 let documents = [];
                 let obj = { id: findDocument._id };

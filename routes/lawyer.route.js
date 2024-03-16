@@ -20,28 +20,28 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage: storage });
 var cpUpload = upload.fields([{ name: 'barRegistrationImage', maxCount: 1 },
- { name: 'barCertificateImage', maxCount: 1 }, 
- { name: 'aadhar', maxCount: 1 }]);
+{ name: 'barCertificateImage', maxCount: 1 },
+{ name: 'aadhar', maxCount: 1 }]);
 
 
 module.exports = (app) => {
-    app.post("/api/v1/lawyer/registration",cpUpload, auth.registration);
+    app.post("/api/v1/lawyer/registration", cpUpload, auth.registration);
     app.post("/api/v1/lawyer/login", auth.loginWithPhone);
     app.post("/api/v1/lawyer/signin", [validateUser.signInBody], auth.signin);
     app.post("/api/v1/lawyer/:id", auth.verifyOtp);
     app.post("/api/v1/lawyer/resendotp/:id", auth.resendOTP);
     app.put("/api/v1/lawyer/resetPassword", auth.resetPassword);
-    app.put("/api/v1/lawyer/update", [authJwt.verifyToken], upload.single("image"),auth.update);
+    app.put("/api/v1/lawyer/update", [authJwt.verifyToken], upload.single("image"), auth.update);
     app.put("/api/v1/lawyer/updateProfile/:id", auth.updateProfile);
     app.get("/api/v1/lawyer/getProfile", [authJwt.verifyToken], auth.getProfile);
     app.post("/api/v1/lawyer/case/add", [authJwt.verifyToken], auth.createCase);
     app.get("/api/v1/lawyer/case/all", [authJwt.verifyToken], auth.getCase);
     app.get("/api/v1/lawyer/case/all/:caseStatus", [authJwt.verifyToken], auth.getCase);
     app.post("/api/v1/lawyer/Appointment/createAppointment", [authJwt.verifyToken], auth.createAppointment);
-    app.get("/api/v1/lawyer/Appointment/upcomingAppointment",  [authJwt.verifyToken], auth.upcomingAppointment);
-    app.get("/api/v1/lawyer/allCancelAppointment",  [authJwt.verifyToken], auth.allCancelAppointment);
-    app.get("/api/v1/lawyer/pastAppointment",  [authJwt.verifyToken], auth.pastAppointment);
-    app.post("/api/v1/lawyer/document/add",[authJwt.verifyToken],document.AddDocument);
+    app.get("/api/v1/lawyer/Appointment/upcomingAppointment", [authJwt.verifyToken], auth.upcomingAppointment);
+    app.get("/api/v1/lawyer/allCancelAppointment", [authJwt.verifyToken], auth.allCancelAppointment);
+    app.get("/api/v1/lawyer/pastAppointment", [authJwt.verifyToken], auth.pastAppointment);
+    app.post("/api/v1/lawyer/document/add", [authJwt.verifyToken], upload.single("image"), document.AddDocument);
     app.get("/api/v1/lawyer/document/all", [authJwt.verifyToken], document.getDocument);
     app.get("/api/v1/lawyer/document/byCaseId/:caseId", [authJwt.verifyToken], document.getBycaseId);
     app.get("/api/v1/lawyer/document/get/:id", document.getById);
@@ -76,6 +76,6 @@ module.exports = (app) => {
     app.delete("/api/v1/lawyer/case/delete/:id", auth.deleteCase);
     app.put("/api/v1/lawyer/case/update/:id", [authJwt.verifyToken], auth.updateCase);
     app.get("/api/v1/lawyer/rating/all", [authJwt.verifyToken], auth.getAllRating);
-    app.get("/api/v1/lawyer/getrefferalCode",  [authJwt.verifyToken], auth.getrefferalCode);
+    app.get("/api/v1/lawyer/getrefferalCode", [authJwt.verifyToken], auth.getrefferalCode);
 
 };
