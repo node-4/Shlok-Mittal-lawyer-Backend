@@ -942,8 +942,7 @@ exports.getSaveDocument = async (req, res) => {
 
 exports.createService = async (req, res) => {
     try {
-        const service = { userId: req.user._id, name: req.body.name };
-        const serviceCreated = await Service.create(service);
+        const serviceCreated = await Service.create({ name: req.body.name });
         return res.status(201).send({ message: "Service add successfully", data: serviceCreated, });
     } catch (err) {
         console.log("#### error while Category create #### ", err.message);
