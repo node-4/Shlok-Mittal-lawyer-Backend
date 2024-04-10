@@ -503,6 +503,30 @@ exports.AddBanner = async (req, res) => {
         })
     }
 };
+exports.updateBanner = async (req, res) => {
+    try {
+        const Banner = await banner.findById({ _id: req.params.id });
+        if (Banner) {
+            let fileUrl;
+            if (req.file) {
+                fileUrl = req.file ? req.file.path : "";
+            } else {
+                fileUrl = Banner.image
+            }
+            const data = {
+                image: fileUrl,
+                desc: req.body.desc || Banner.desc
+            }
+            let update = await banner.findByIdAndUpdate({ _id: Banner._id }, { $set: data }, { new: true, });
+            return res.status(200).json({ message: "Banner is update ", data: update })
+        } else {
+            return res.status(404).json({ message: "Banner Not Found", status: 404, data: {} })
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({ message: err.message })
+    }
+};
 exports.getBanner = async (req, res) => {
     try {
         const Banner = await banner.find();

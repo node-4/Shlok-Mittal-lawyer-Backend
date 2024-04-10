@@ -50,6 +50,7 @@ module.exports = (app) => {
     app.delete("/api/v1/category/:id", [authJwt.verifyToken], auth.deleteCategory);
     app.post('/api/v1/admin/CreateBanner', upload.single("image"), auth.AddBanner);
     app.get('/api/v1/admin/AllBanner', auth.getBanner);
+    app.put('/api/v1/admin/updateBanner/:id', upload.single("image"), auth.updateBanner);
     app.get('/api/v1/admin/banner/:id', auth.getByIdBanner);
     app.delete('/api/v1/admin/delete/:id', auth.DeleteBanner);
     app.post("/api/v1/admin/createLocation", [authJwt.verifyToken], auth.createLocation);
