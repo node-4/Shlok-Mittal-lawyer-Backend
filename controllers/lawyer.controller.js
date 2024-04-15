@@ -363,6 +363,31 @@ exports.updateCase = async (req, res) => {
         });
     }
 };
+exports.updateCaseStatus = async (req, res) => {
+    try {
+        const data = await caseModel.findById(req.params.id);
+        if (!data) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        if (data.status == "open") {
+            const update = await caseModel.findByIdAndUpdate({ _id: req.params.id }, { $set: { status: "closed" } }, { new: true, });
+            if (update) {
+                return res.status(200).send({ msg: "Case closed successfully.", data: update });
+            }
+        } else {
+            const update = await caseModel.findByIdAndUpdate({ _id: req.params.id }, { $set: { status: "open" } }, { new: true, });
+            if (update) {
+                return res.status(200).send({ msg: "Case open successfully", data: update });
+            }
+        }
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
 exports.getCase = async (req, res) => {
     try {
         const data = await caseModel.find({ lawyer: req.user._id }).populate('lawyer userId');
@@ -398,6 +423,7 @@ exports.createAppointment = async (req, res) => {
                 lawyer: req.user._id,
                 userId: req.body.userId,
                 case: req.body.caseId,
+                meetingId: await reffralCode(),
                 appointmentDate: req.body.appointmentDate,
                 appointmentType: req.body.appointmentType,
                 appointmentTime: req.body.appointmentTime
@@ -516,17 +542,14 @@ exports.upcommingCase = async (req, res) => {
         let fullDate = (`${year}-${month1}-${date1}`).toString()
         const d = new Date(fullDate);
         let text = d.toISOString();
-        const data = await caseModel.find({ lawyer: req.user._id, hearingDate: { $gte: text } }).populate('userId lawyer');
+        const data = await caseModel.find({ lawyer: req.user._id, hearingDate: { $gte: text }, }).populate('userId lawyer');
         if (!data || data.length === 0) {
             return res.status(400).send({ status: 404, msg: "not found" });
         }
         return res.status(200).send({ data: data });
     } catch (err) {
         console.log(err.message);
-        return res.status(500).send({
-            msg: "internal server error ",
-            error: err.message,
-        });
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.getAllRating = async (req, res) => {

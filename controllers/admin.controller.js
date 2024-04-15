@@ -298,6 +298,22 @@ exports.getCase = async (req, res) => {
         return res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
+
+exports.getClosedCase = async (req, res) => {
+    try {
+        const data = await caseModel.find({ status: "closed" }).populate('lawyer userId');
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: err.message,
+        });
+    }
+};
 exports.getIdCase = async (req, res) => {
     try {
         const data = await caseModel.findById(req.params.id).populate('lawyer userId');

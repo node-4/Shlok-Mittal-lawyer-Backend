@@ -61,6 +61,11 @@ const casesSchema = mongoose.Schema({
         type: String,
         enum: ["General", "Urgent"],
     },
+    status: {
+        type: String,
+        enum: ["open", "closed"],
+        default: "open",
+    },
 });
 const cases = mongoose.model("cases", casesSchema);
 

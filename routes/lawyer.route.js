@@ -59,6 +59,7 @@ module.exports = (app) => {
     app.get("/api/v1/lawyer/Bill/all", [authJwt.verifyToken], auth.getAllbill);
     app.get("/api/v1/lawyer/Client/all", [authJwt.verifyToken], auth.getAllClient);
 
+    app.put("/api/v1/lawyer/case/updateCaseStatus/:id", auth.updateCaseStatus);
 
 
 

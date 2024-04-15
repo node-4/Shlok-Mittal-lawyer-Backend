@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 const casesSchema = mongoose.Schema({
+    meetingId: {
+        type: String,
+    },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
