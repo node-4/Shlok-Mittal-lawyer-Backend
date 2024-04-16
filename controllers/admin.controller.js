@@ -149,12 +149,12 @@ exports.CreateLawyer = async (req, res) => {
 };
 exports.updateLawyer = async (req, res) => {
     try {
-        const { name, email, phone, password, bio, hearingFee, image, experiance, languages, } = req.body;
+        const { fullName, email, phone, password, bio, hearingFee, image, experiance, languages, } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
         }
-        user.name = name || user.name;
+        user.fullName = fullName || user.fullName;
         user.email = email || user.email;
         user.phone = phone || user.phone;
         user.image = image || user.image;
@@ -483,7 +483,13 @@ exports.createCategory = async (req, res) => {
             if (req.file) {
                 fileUrl = req.file ? req.file.path : "";
             }
-            const data = { name: req.body.name, image: fileUrl };
+            const data = {
+                name: req.body.name,
+                image: fileUrl,
+                type: req.body.type,
+                category: req.body.category,
+                info: req.body.info,
+            };
             const category = await Category.create(data);
             return res.status(200).json({ message: "Category add successfully.", status: 200, data: category });
         }
@@ -503,6 +509,9 @@ exports.updateCategory = async (req, res) => {
     }
     category.image = fileUrl || category.image;
     category.name = req.body.name || category.name;
+    category.type = req.body.type || category.type;
+    category.category = req.body.category || category.category;
+    category.info = req.body.info || category.info;
     let update = await category.save();
     return res.status(200).json({ message: "Updated Successfully", data: update });
 };
@@ -1030,10 +1039,20 @@ exports.getSaveDocument = async (req, res) => {
         return res.status(500).json({ message: "server error while getting lawyer", error: err.message, });
     }
 }
-
 exports.createService = async (req, res) => {
     try {
-        const serviceCreated = await Service.create({ name: req.body.name });
+        let fileUrl;
+        if (req.file) {
+            fileUrl = req.file ? req.file.path : "";
+        }
+        const data = {
+            name: req.body.name,
+            image: fileUrl,
+            type: req.body.type,
+            category: req.body.category,
+            info: req.body.info,
+        };
+        const serviceCreated = await Service.create(data);
         return res.status(201).send({ message: "Service add successfully", data: serviceCreated, });
     } catch (err) {
         console.log("#### error while Category create #### ", err.message);
@@ -1044,10 +1063,7 @@ exports.createService = async (req, res) => {
 };
 exports.getService = async (req, res) => {
     try {
-        const data = await Service.find().populate({
-            path: "userId",
-            select: "name",
-        });
+        const data = await Service.find();
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -1077,13 +1093,22 @@ exports.getServiceId = async (req, res) => {
 };
 exports.updateService = async (req, res) => {
     try {
-        const data = await Service.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-        });
-        if (!data) {
-            return res.status(400).send({ msg: "not found" });
+        const { id } = req.params;
+        const category = await Service.findById(id);
+        if (!category) {
+            return res.status(404).json({ message: "Service Not Found", status: 404, data: {} });
         }
-        return res.status(200).send({ msg: "updated", data: data });
+        let fileUrl;
+        if (req.file) {
+            fileUrl = req.file ? req.file.path : "";
+        }
+        category.image = fileUrl || category.image;
+        category.name = req.body.name || category.name;
+        category.type = req.body.type || category.type;
+        category.category = req.body.category || category.category;
+        category.info = req.body.info || category.info;
+        let update = await category.save();
+        return res.status(200).send({ msg: "updated", data: update });
     } catch (err) {
         console.log(err.message);
         return res.status(500).send({
@@ -1105,6 +1130,61 @@ exports.deleteService = async (req, res) => {
             msg: "internal server error",
             error: err.message,
         });
+    }
+};
+
+exports.CreateStaff = async (req, res) => {
+    const { phone, email } = req.body;
+    try {
+        let user = await User.findOne({ $and: [{ $or: [{ email: email }, { phone: phone }] }], userType: "STAFF", });
+        if (!user) {
+            req.body.password = bcrypt.hashSync(req.body.password, 8);
+            req.body.userType = "STAFF";
+            req.body.refferalCode = await reffralCode();
+            const userCreate = await User.create(req.body);
+            return res.status(200).send({ message: "registered successfully ", data: userCreate, });
+        } else {
+            return res.status(409).send({ message: "Already Exist", data: [] });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+exports.getStaff = async (req, res) => {
+    try {
+        const findLawyer = await User.find({ userType: "STAFF" })
+        if (findLawyer.length === 0) {
+            return res.status(404).json({ message: "Staff not found" });
+        }
+        return res.status(200).json({ status: 200, message: "Staff  found", data: findLawyer });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).json({ message: "server error while getting Staff", error: err.message, });
+    }
+};
+exports.updateStaff = async (req, res) => {
+    try {
+        const data = await User.findById(req.params.id);
+        if (!data) {
+            return res.status(400).send({ msg: "Staff not found" });
+        } else {
+            data.fullName = fullName || data.fullName;
+            data.email = req.body.email || data.email;
+            data.phone = req.body.phone || data.phone;
+            data.permission = req.body.permission || data.permission;
+            data.status = req.body.status || data.status;
+            if (req.body.password) {
+                data.password = bcrypt.hashSync(req.body.password, 8);
+            } else {
+                data.password = data.password;
+            }
+            const updated = await data.save();
+            return res.status(200).json({ status: 200, message: "Staff  updated successfully", data: updated });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
     }
 };
 const reffralCode = async () => {

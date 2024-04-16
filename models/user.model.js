@@ -118,7 +118,7 @@ var userSchema = new schema(
         userType: {
             type: String,
             default: "",
-            enum: ["CUSTOMER", "LAWYER", "ADMIN"],
+            enum: ["CUSTOMER", "LAWYER", "ADMIN", "STAFF"],
         },
         expertises: [{
             expertise: {
@@ -164,6 +164,9 @@ var userSchema = new schema(
         wallet: {
             type: Number,
             default: 0,
+        },
+        permission: {
+            type: Array,
         },
     },
     { timestamps: true }

@@ -85,9 +85,16 @@ module.exports = (app) => {
     app.get("/api/v1/admin/getSaveDocument", auth.getSaveDocument);
 
 
-    app.post("/api/v1/admin/createService", [authJwt.verifyToken], auth.createService);
+    app.post("/api/v1/admin/createService", [authJwt.verifyToken], upload.single("image"), auth.createService);
     app.get("/api/v1/admin/service", auth.getService);
     app.get("/api/v1/admin/service/:id", auth.getServiceId);
-    app.patch("/api/v1/admin/service/:id", [authJwt.verifyToken], auth.updateService);
+    app.patch("/api/v1/admin/service/:id", [authJwt.verifyToken], upload.single("image"), auth.updateService);
     app.delete("/api/v1/admin/service/:id", [authJwt.verifyToken], auth.deleteService);
+
+
+    app.post("/api/v1/admin/CreateStaff", [authJwt.verifyToken], auth.CreateStaff);
+    app.get("/api/v1/admin/getStaff", auth.getStaff);
+    app.patch("/api/v1/admin/updateStaff/:id", auth.updateStaff);
+
+
 };
