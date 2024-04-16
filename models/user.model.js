@@ -106,6 +106,11 @@ var userSchema = new schema(
             type: Boolean,
             default: false,
         },
+        status: {
+            type: String,
+            default: "Pending",
+            enum: ["Active", "Block", "Pending"],
+        },
         kyc: {
             type: String,
             default: "",

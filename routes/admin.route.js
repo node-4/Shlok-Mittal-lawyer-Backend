@@ -35,6 +35,9 @@ module.exports = (app) => {
     app.put("/api/v1/admin/updateUser/:id", [authJwt.verifyToken], upload.single("image"), auth.updateUser);
     app.post("/api/v1/admin/case/add", [authJwt.verifyToken], auth.createCase);
     app.get("/api/v1/admin/case/all", auth.getCase);
+    app.get("/api/v1/admin/OldCase/all", auth.getOldCase);
+    app.get("/api/v1/admin/NewCase/all", auth.getNewCase);
+
     app.get("/api/v1/admin/case/getClosed", auth.getClosedCase);
     app.get("/api/v1/admin/case/get/:id", auth.getIdCase);
     app.delete("/api/v1/admin/case/delete/:id", auth.deleteCase);

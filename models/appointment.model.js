@@ -30,6 +30,7 @@ const casesSchema = mongoose.Schema({
     },
     totalTime: {
         type: String,
+        default: "",
     },
     joinStatus: {
         type: String,
@@ -48,6 +49,7 @@ const casesSchema = mongoose.Schema({
     },
     subject: {
         type: String,
+        default: "Appointment",
     },
     message: {
         type: String,
