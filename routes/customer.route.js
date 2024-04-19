@@ -53,5 +53,6 @@ module.exports = (app) => {
 
     app.get("/api/v1/user/allTransaction", wallet.allTransaction);
     app.get("/api/v1/user/allRating", auth.allRating);
+    app.get("/api/v1/user/allRatingLawyer/:lawyerId", auth.allRatingLawyer);
 
 };

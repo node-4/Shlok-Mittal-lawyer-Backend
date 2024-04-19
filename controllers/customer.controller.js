@@ -535,6 +535,18 @@ exports.allRating = async (req, res) => {
         return res.status(501).send({ message: "server error.", data: {}, });
     }
 };
+exports.allRatingLawyer = async (req, res) => {
+    try {
+        const allData = await rating.find({ lawyerId: req.params.lawyerId }).populate('userId lawyerId');
+        if (!allData || allData.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ status: 200, message: "Data found successfully.", data: allData });
+    } catch (error) {
+        console.log(error);
+        return res.status(501).send({ message: "server error.", data: {}, });
+    }
+};
 exports.getLawyersbyRating = async (req, res) => {
     try {
         const findLawyer = await User.find({ userType: "LAWYER", rating: { $gte: req.params.rating } });

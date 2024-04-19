@@ -219,7 +219,7 @@ exports.getUsers = async (req, res) => {
 };
 exports.updateUser = async (req, res) => {
     try {
-        const { firstName, lastName, email, phone, kyc, whatAppNotification, image, blogNotification, } = req.body;
+        const { firstName, lastName, email, phone, kyc, whatAppNotification, image, blogNotification, firstLineAddress, secondLineAddress, country, state, pincode, district } = req.body;
         const user = await User.findById({ _id: req.params.id });
         if (!user) {
             return res.status(404).send({ message: "not found" });
@@ -241,7 +241,13 @@ exports.updateUser = async (req, res) => {
             kyc: kyc || user.kyc,
             whatAppNotification: whatAppNotification || user.whatAppNotification,
             blogNotification: blogNotification || user.blogNotification,
-            password: password || user.password
+            password: password || user.password,
+            firstLineAddress: firstLineAddress || user.firstLineAddress,
+            secondLineAddress: secondLineAddress || user.secondLineAddress,
+            country: country || user.country,
+            state: state || user.state,
+            district: district || user.district,
+            pincode: pincode || user.pincode,
         }
         console.log(obj);
         let updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true })
