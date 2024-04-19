@@ -87,18 +87,42 @@ exports.update = async (req, res) => {
 exports.dashboard = async (req, res) => {
     try {
         let totalUser = await userModel.find({ userType: "CUSTOMER" }).count();
+        let oldUser = await userModel.find({ userType: "CUSTOMER" }).count();
+        let newUser = await userModel.find({ userType: "CUSTOMER" }).count();
         let totalLawyer = await userModel.find({ userType: "LAWYER" }).count();
-        const totalDepartment = await Department.find().count();
-        const totalService = await Service.find().count();
-        const totalCases = await caseModel.find({}).count();
-        const totalBooking = await appointment.find({}).count();
+        let oldLawyer = await userModel.find({ userType: "LAWYER" }).count();
+        let newLawyer = await userModel.find({ userType: "LAWYER" }).count();
+        let totalDepartment = await Category.find().count();
+        let oldDepartment = await Category.find().count();
+        let newDepartment = await Category.find().count();
+        let totalService = await Service.find().count();
+        let oldService = await Service.find().count();
+        let newService = await Service.find().count();
+        let totalCases = await caseModel.find({}).count();
+        let oldCases = await caseModel.find({}).count();
+        let newCases = await caseModel.find({}).count();
+        let totalBooking = await appointment.find({}).count();
+        let oldBooking = await appointment.find({}).count();
+        let newBooking = await appointment.find({}).count();
         let obj = {
-            totalUser: totalUser,
             totalLawyer: totalLawyer,
+            oldLawyer: oldLawyer,
+            newLawyer: newLawyer,
+            totalUser: totalUser,
+            oldUser: oldUser,
+            newUser: newUser,
             totalBooking: totalBooking,
+            oldBooking: oldBooking,
+            newBooking: newBooking,
             totalCases: totalCases,
+            oldCases: oldCases,
+            newCases: newCases,
             totalService: totalService,
+            oldService: oldService,
+            newService: newService,
             totalDepartment: totalDepartment,
+            oldDepartment: oldDepartment,
+            newDepartment: newDepartment,
         };
         return res.status(200).send({ message: "Data found successfully", data: obj });
     } catch (err) {
@@ -149,12 +173,22 @@ exports.CreateLawyer = async (req, res) => {
 };
 exports.updateLawyer = async (req, res) => {
     try {
-        const { fullName, email, phone, password, bio, hearingFee, image, experiance, languages, } = req.body;
+        const { fullName, lastName, email, barCertificateNo, categoryId, barCertificate, firstLineAddress, secondLineAddress, country, state, district, pincode, phone, password, bio, hearingFee, image, experiance, languages, } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
         }
+        user.barCertificateNo = barCertificateNo || user.barCertificateNo;
+        user.categoryId = categoryId || user.categoryId;
+        user.barCertificate = barCertificate || user.barCertificate;
+        user.firstLineAddress = firstLineAddress || user.firstLineAddress;
+        user.secondLineAddress = secondLineAddress || user.secondLineAddress;
+        user.country = country || user.country;
+        user.state = state || user.state;
+        user.district = district || user.district;
+        user.pincode = pincode || user.pincode;
         user.fullName = fullName || user.fullName;
+        user.lastName = lastName || user.lastName;
         user.email = email || user.email;
         user.phone = phone || user.phone;
         user.image = image || user.image;
@@ -162,6 +196,24 @@ exports.updateLawyer = async (req, res) => {
         user.hearingFee = hearingFee || user.hearingFee;
         user.experiance = experiance || user.experiance;
         user.languages = languages || user.languages;
+        if (req.files['barRegistrationImage']) {
+            let barRegist = req.files['barRegistrationImage'];
+            req.body.barRegistrationImage = barRegist[0].path;
+        } else {
+            req.body.barRegistrationImage = user.barRegistrationImage;
+        }
+        if (req.files['barCertificateImage']) {
+            let barCert = req.files['barCertificateImage'];
+            req.body.barCertificateImage = barCert[0].path;
+        } else {
+            req.body.barCertificateImage = user.barCertificateImage;
+        }
+        if (req.files['aadhar']) {
+            let aad = req.files['aadhar'];
+            req.body.aadhar = aad[0].path;
+        } else {
+            req.body.aadhar = user.aadhar;
+        }
         if (req.body.password) {
             user.password = bcrypt.hashSync(password, 8) || user.password;
         }

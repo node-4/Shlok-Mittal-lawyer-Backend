@@ -28,7 +28,7 @@ module.exports = (app) => {
     app.get("/api/v1/admin/dashboard", [authJwt.verifyToken], auth.dashboard);
     app.get("/api/v1/admin/lawyer", [authJwt.verifyToken], auth.getLawyers);
     app.post("/api/v1/admin/CreateLawyer", [authJwt.verifyToken], cpUpload, auth.CreateLawyer);
-    app.put("/api/v1/admin/updateLawyer/:id", [authJwt.verifyToken], auth.updateLawyer);
+    app.put("/api/v1/admin/updateLawyer/:id", [authJwt.verifyToken], cpUpload, auth.updateLawyer);
     app.get("/api/v1/admin/users", [authJwt.verifyToken], auth.getUsers);
     app.delete("/api/v1/admin/User/:id", [authJwt.verifyToken], auth.deleteUser);
     app.get("/api/v1/admin/User/:id", auth.getUserById);
