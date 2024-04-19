@@ -565,7 +565,10 @@ exports.AddBanner = async (req, res) => {
         }
         const data = {
             image: fileUrl,
-            desc: req.body.desc
+            desc: req.body.desc,
+            date: req.body.date,
+            title: req.body.title,
+            link: req.body.link
         }
         const Data = await banner.create(data);
         return res.status(200).json({
@@ -591,7 +594,10 @@ exports.updateBanner = async (req, res) => {
             }
             const data = {
                 image: fileUrl,
-                desc: req.body.desc || Banner.desc
+                desc: req.body.desc || Banner.desc,
+                date: req.body.date || Banner.date,
+                title: req.body.title || Banner.title,
+                link: req.body.link || Banner.link,
             }
             let update = await banner.findByIdAndUpdate({ _id: Banner._id }, { $set: data }, { new: true, });
             return res.status(200).json({ message: "Banner is update ", data: update })

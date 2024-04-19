@@ -51,4 +51,7 @@ module.exports = (app) => {
     app.get("/api/v1/customer/getmyLawyer", [authJwt.verifyToken], auth.getAllLawyer);
     app.get("/api/v1/customer/getLawyersbyRating/:rating", auth.getLawyersbyRating);
 
+    app.get("/api/v1/user/allTransaction", wallet.allTransaction);
+    app.get("/api/v1/user/allRating", auth.allRating);
+
 };

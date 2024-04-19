@@ -88,3 +88,15 @@ exports.allDebitTransactionUser = async (req, res) => {
                 return res.status(400).json({ message: err.message });
         }
 };
+exports.allTransaction = async (req, res) => {
+        try {
+                const data = await transaction.find({}).populate("user");
+                if (data.length > 0) {
+                        return res.status(200).json({ message: "get Profile", data: data });
+                } else {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                }
+        } catch (err) {
+                return res.status(400).json({ message: err.message });
+        }
+};

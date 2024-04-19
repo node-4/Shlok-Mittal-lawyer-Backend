@@ -9,6 +9,17 @@ const bannerSchema = mongoose.Schema({
     desc: {
         type: String,
         require: false
+    },
+    link: {
+        type: String,
+        require: false
+    },
+    title: {
+        type: String,
+        require: false
+    },
+    date: {
+        type: Date,
     }
 })
 
