@@ -154,7 +154,9 @@ exports.CreateLawyer = async (req, res) => {
     try {
         let user = await User.findOne({ $and: [{ $or: [{ email: email }, { phone: phone }] }], userType: "LAWYER", });
         if (!user) {
-            req.body.password = bcrypt.hashSync(req.body.password, 8);
+            if (req.body.password) {
+                req.body.password = bcrypt.hashSync(req.body.password, 8);
+            }
             req.body.userType = "LAWYER";
             req.body.refferalCode = await reffralCode();
             if (req.files['barRegistrationImage']) {
