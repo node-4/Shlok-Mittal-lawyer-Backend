@@ -62,12 +62,14 @@ exports.signin = async (req, res) => {
 };
 exports.update = async (req, res) => {
     try {
-        const { name, email, phone, password, image } = req.body;
+        const { fullName, firstName, lastName, email, phone, password, image } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
         }
-        user.name = name || user.name;
+        user.fullName = fullName || user.fullName;
+        user.firstName = firstName || user.firstName;
+        user.lastName = lastName || user.lastName;
         user.email = email || user.email;
         user.phone = phone || user.phone;
         user.image = image || user.image;
@@ -173,7 +175,7 @@ exports.CreateLawyer = async (req, res) => {
 };
 exports.updateLawyer = async (req, res) => {
     try {
-        const { fullName, lastName, email, barCertificateNo, categoryId, barCertificate, firstLineAddress, secondLineAddress, country, state, district, pincode, phone, password, bio, hearingFee, image, experiance, languages, } = req.body;
+        const { fullName, firstName, lastName, email, barCertificateNo, categoryId, barCertificate, firstLineAddress, secondLineAddress, country, state, district, pincode, phone, password, bio, hearingFee, image, experiance, languages, } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
@@ -188,6 +190,7 @@ exports.updateLawyer = async (req, res) => {
         user.district = district || user.district;
         user.pincode = pincode || user.pincode;
         user.fullName = fullName || user.fullName;
+        user.firstName = firstName || user.firstName;
         user.lastName = lastName || user.lastName;
         user.email = email || user.email;
         user.phone = phone || user.phone;
@@ -271,7 +274,7 @@ exports.getUsers = async (req, res) => {
 };
 exports.updateUser = async (req, res) => {
     try {
-        const { firstName, lastName, email, phone, kyc, whatAppNotification, image, blogNotification, firstLineAddress, secondLineAddress, country, state, pincode, district } = req.body;
+        const { firstName, fullName, lastName, email, phone, kyc, whatAppNotification, image, blogNotification, firstLineAddress, secondLineAddress, country, state, pincode, district } = req.body;
         const user = await User.findById({ _id: req.params.id });
         if (!user) {
             return res.status(404).send({ message: "not found" });
@@ -285,6 +288,7 @@ exports.updateUser = async (req, res) => {
             password = bcrypt.hashSync(req.body.password, 8)
         }
         let obj = {
+            fullName: fullName || user.fullName,
             firstName: firstName || user.firstName,
             lastName: lastName || user.lastName,
             email: email || user.email,
