@@ -152,17 +152,23 @@ exports.getLawyers = async (req, res) => {
 exports.CreateLawyer = async (req, res) => {
     const { phone, email } = req.body;
     try {
-        let user = await User.findOne({ $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }], userType: "LAWYER", });
+        let user = await User.findOne({ $and: [{ $or: [{ email: email }, { phone: phone }] }], userType: "LAWYER", });
         if (!user) {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
             req.body.userType = "LAWYER";
             req.body.refferalCode = await reffralCode();
-            let barRegist = req.files['barRegistrationImage'];
-            let barCert = req.files['barCertificateImage'];
-            let aad = req.files['aadhar'];
-            req.body.barRegistrationImage = barRegist[0].path;
-            req.body.barCertificateImage = barCert[0].path;
-            req.body.aadhar = aad[0].path;
+            if (req.files['barRegistrationImage']) {
+                let barRegist = req.files['barRegistrationImage'];
+                req.body.barRegistrationImage = barRegist[0].path;
+            }
+            if (req.files['barCertificateImage']) {
+                let barCert = req.files['barCertificateImage'];
+                req.body.barCertificateImage = barCert[0].path;
+            }
+            if (req.files['aadhar']) {
+                let aad = req.files['aadhar'];
+                req.body.aadhar = aad[0].path;
+            }
             const userCreate = await User.create(req.body);
             return res.status(200).send({ message: "registered successfully ", data: userCreate, });
         } else {
