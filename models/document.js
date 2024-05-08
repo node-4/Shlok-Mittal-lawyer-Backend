@@ -20,7 +20,7 @@ const documentSchema = mongoose.Schema({
         type: String,
         require: false,
     },
-});
+}, { timeseries: true });
 const document = mongoose.model("document", documentSchema);
 
 module.exports = document;

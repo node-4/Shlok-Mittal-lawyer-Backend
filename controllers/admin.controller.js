@@ -183,7 +183,7 @@ exports.CreateLawyer = async (req, res) => {
 };
 exports.updateLawyer = async (req, res) => {
     try {
-        const { fullName, firstName, lastName, email, barCertificateNo, categoryId, barCertificate, firstLineAddress, secondLineAddress, country, state, district, pincode, phone, password, bio, hearingFee, image, experiance, languages, } = req.body;
+        const { fullName, firstName, lastName, email, kyc, barCertificateNo, categoryId, barCertificate, firstLineAddress, secondLineAddress, country, state, district, pincode, phone, password, bio, hearingFee, image, experiance, languages, } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
@@ -204,6 +204,7 @@ exports.updateLawyer = async (req, res) => {
         user.phone = phone || user.phone;
         user.image = image || user.image;
         user.bio = bio || user.bio;
+        user.kyc = kyc || user.kyc;
         user.hearingFee = hearingFee || user.hearingFee;
         user.experiance = experiance || user.experiance;
         user.languages = languages || user.languages;

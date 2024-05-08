@@ -6,15 +6,16 @@ exports.createNotification = async (req, res) => {
         let id = await reffralCode();
         const findAdmin = await User.findOne({ userType: "ADMIN" })
         if (req.body.userType === "LAWYER") {
-            await notificationFunction(req.body.message, req.body.title, req.body.userType, id, req.body.isEnable)
+            await notificationFunction(req.body.message, req.body.title, req.body.userType, id, req.body.isEnable, req.body.date)
         } else if (req.body.userType === "CUSTOMER") {
-            await notificationFunction(req.body.message, req.body.title, req.body.userType, id, req.body.isEnable)
+            await notificationFunction(req.body.message, req.body.title, req.body.userType, id, req.body.isEnable, req.body.date)
         } else {
-            await notificationFunction(req.body.message, req.body.title, req.body.userType, id, req.body.isEnable)
+            await notificationFunction(req.body.message, req.body.title, req.body.userType, id, req.body.isEnable, req.body.date)
         }
         const notification = await Notification.create({
             message: req.body.message,
             title: req.body.title,
+            date: req.body.date,
             userId: findAdmin._id,
             isRead: false,
             id: id,
@@ -134,7 +135,7 @@ const reffralCode = async () => {
     }
     return OTP;
 }
-const notificationFunction = async (message, title, userType, id, isEnable) => {
+const notificationFunction = async (message, title, userType, id, isEnable, date) => {
     if (userType == 'All') {
         const findLawyer = await User.find({ userType: { $ne: "ADMIN" } });
         if (findLawyer.length > 0) {
@@ -145,6 +146,7 @@ const notificationFunction = async (message, title, userType, id, isEnable) => {
                     userId: findLawyer[i]._id,
                     isRead: false,
                     id: id,
+                    date: date,
                     isEnable: isEnable
                 })
             }
@@ -159,6 +161,7 @@ const notificationFunction = async (message, title, userType, id, isEnable) => {
                     userId: findLawyer[i]._id,
                     isRead: false,
                     id: id,
+                    date: date,
                     isEnable: isEnable
                 })
             }
