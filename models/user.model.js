@@ -34,7 +34,6 @@ var userSchema = new schema(
         email: {
             type: String,
             default: "",
-            minLength: 10,
         },
         password: {
             type: String,
