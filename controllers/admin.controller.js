@@ -1215,7 +1215,12 @@ exports.CreateStaff = async (req, res) => {
     try {
         let user = await User.findOne({ $and: [{ $or: [{ email: email }, { phone: phone }] }], userType: "STAFF", });
         if (!user) {
-            req.body.password = bcrypt.hashSync(req.body.password, 8);
+            if (req.body.password) {
+                req.body.password = bcrypt.hashSync(req.body.password, 8);
+            } else {
+                let pass = '12345678';
+                req.body.password = bcrypt.hashSync(pass, 8);
+            }
             req.body.userType = "STAFF";
             req.body.refferalCode = await reffralCode();
             const userCreate = await User.create(req.body);
