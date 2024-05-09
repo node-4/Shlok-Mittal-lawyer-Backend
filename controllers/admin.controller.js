@@ -1246,7 +1246,7 @@ exports.updateStaff = async (req, res) => {
         if (!data) {
             return res.status(400).send({ msg: "Staff not found" });
         } else {
-            data.fullName = fullName || data.fullName;
+            data.fullName = req.body.fullName || data.fullName;
             data.email = req.body.email || data.email;
             data.phone = req.body.phone || data.phone;
             data.permission = req.body.permission || data.permission;
