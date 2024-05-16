@@ -155,7 +155,7 @@ exports.resendOTP = async (req, res) => {
 exports.resetPassword = async (req, res) => {
     const { email } = req.body;
     try {
-        const user = await User.findOne({ email: email });
+        const user = await User.findOne({ email: email, userType: "LAWYER" });
         if (!user) {
             return res.status(400).send({ message: "User not found" });
         }
