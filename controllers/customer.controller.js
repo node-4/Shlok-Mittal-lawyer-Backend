@@ -401,7 +401,7 @@ exports.appointmentFeedback = async (req, res) => {
 };
 exports.upcomingAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Pending" }).populate('lawyer userId');
+        const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Pending" }).populate('lawyer case userId');
         return res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
     } catch (err) {
         console.log(err);
@@ -410,7 +410,7 @@ exports.upcomingAppointment = async (req, res) => {
 };
 exports.allCancelAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Cancel" }).populate('lawyer userId');
+        const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Cancel" }).populate('lawyer case userId');
         return res.status(200).json({ message: "All Document", data: FindAppointment });
     } catch (err) {
         console.log(err);
@@ -421,7 +421,7 @@ exports.allCancelAppointment = async (req, res) => {
 };
 exports.pastAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Done" }).populate('lawyer userId');
+        const FindAppointment = await appointment.find({ userId: req.user._id, appointmentStatus: "Done" }).populate('lawyer case userId');
         return res.status(200).json({ message: "All Document", data: FindAppointment });
     } catch (err) {
         console.log(err);
