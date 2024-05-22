@@ -32,6 +32,7 @@ module.exports = (app) => {
     app.post("/api/v1/customer/saveDocument/:id", [authJwt.verifyToken], auth.SaveDocument);
     app.get("/api/v1/customer/getSaveDocument", [authJwt.verifyToken], auth.getSaveDocument);
     app.post("/api/v1/customer/createAppointment", [authJwt.verifyToken], auth.createAppointment);
+    app.post("/api/v1/customer/create/Appointment", [authJwt.verifyToken], auth.createAppointment);
     app.post("/api/v1/customer/instant/Appointment", [authJwt.verifyToken], auth.instantAppointment);
     app.post("/api/v1/customer/cancelAppointment/:id", [authJwt.verifyToken], auth.cancelAppointment);
     app.post("/api/v1/customer/appointmentFeedback/:id", [authJwt.verifyToken], auth.appointmentFeedback);
