@@ -273,7 +273,7 @@ exports.SaveDocument = async (req, res) => {
 };
 exports.getSaveDocument = async (req, res) => {
     try {
-        const usersDocument = await saveDocuments.find({ userId: req.user._id }).populate('documents');
+        const usersDocument = await saveDocuments.find({ userId: req.user._id }).populate('documents.id');
         if (usersDocument.length === 0) {
             return res.status(404).json({ message: "save Document not found" });
         }
