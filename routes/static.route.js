@@ -18,4 +18,11 @@ module.exports = (app) => {
     app.get("/api/v1/privacy/get/:id", auth.getPrivacyPolicyById);
     app.delete("/api/v1/privacy/delete/:id", auth.deletePrivacyPolicy);
     app.put("/api/v1/privacy/update/:id", [authJwt.verifyToken], auth.updatePrivacyPolicy);
+    app.post("/api/v1/aboutUs/add", [authJwt.verifyToken], auth.createAboutUs);
+    app.get("/api/v1/aboutUs/all", auth.getAllAboutUs);
+    app.get("/api/v1/aboutUs/get/:id", auth.getAboutUsById);
+    app.delete("/api/v1/aboutUs/delete/:id", auth.deleteAboutUs);
+    app.put("/api/v1/aboutUs/update/:id", [authJwt.verifyToken], auth.updateAboutUs);
+    app.post("/api/v1/aboutUs/addDescriptionArrayInAboutUs", [authJwt.verifyToken], upload.single('image'), auth.addDescriptionArrayInAboutUs);
+    app.put("/api/v1/aboutUs/deleteDescriptionArrayInAboutUs/:id", [authJwt.verifyToken], auth.deleteDescriptionArrayInAboutUs);
 };

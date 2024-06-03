@@ -7,9 +7,23 @@ const termsAndConditionsSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ["TERMS&CONDITION", "PRIVACY POLICY"],
+        enum: ["TERMS&CONDITION", "PRIVACY POLICY", "ABOUTUS"],
     },
-
+    descriptionArray: [{
+        title: {
+            type: String,
+        },
+        description: {
+            type: String,
+        },
+        image: {
+            type: String,
+        },
+    }],
+    aboutType: {
+        type: String,
+        enum: ["Main", "about"]
+    },
 });
 
 module.exports = mongoose.model('TermsAndConditions', termsAndConditionsSchema);

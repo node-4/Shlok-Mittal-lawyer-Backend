@@ -7,6 +7,7 @@ const schema = new mongoose.Schema(
         },
         type: {
             type: String,
+            enum: ["legal", "government"],
         },
         category: {
             type: String,
