@@ -452,6 +452,10 @@ exports.updateCaseManager = async (req, res) => {
 };
 exports.createCity = async (req, res) => {
         try {
+                let findCity = await city.findOne({ city: req.body.city });
+                if (findCity) {
+                        return res.status(400).json({ message: "City already exist.", status: 400, data: {} });
+                }
                 let image;
                 if (req.file) {
                         image = req.file.path

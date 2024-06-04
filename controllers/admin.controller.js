@@ -183,7 +183,7 @@ exports.CreateLawyer = async (req, res) => {
 };
 exports.updateLawyer = async (req, res) => {
     try {
-        const { fullName, firstName, lastName, email, kyc, barCertificateNo, categoryId, barCertificate, firstLineAddress, secondLineAddress, country, state, district, pincode, phone, password, bio, hearingFee, image, experiance, languages, } = req.body;
+        const { fullName, firstName, lastName, email, kyc, barCertificateNo, categoryId, barCertificate, firstLineAddress, secondLineAddress, country, state, district, pincode, phone, password, bio, hearingFee, image, experiance, languages, advoAssurance, paymentStructure } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
@@ -208,6 +208,8 @@ exports.updateLawyer = async (req, res) => {
         user.hearingFee = hearingFee || user.hearingFee;
         user.experiance = experiance || user.experiance;
         user.languages = languages || user.languages;
+        user.paymentStructure = paymentStructure || user.paymentStructure;
+        user.advoAssurance = advoAssurance || user.advoAssurance;
         if (req.files['barRegistrationImage']) {
             let barRegist = req.files['barRegistrationImage'];
             req.body.barRegistrationImage = barRegist[0].path;

@@ -170,6 +170,12 @@ var userSchema = new schema(
         permission: {
             type: Array,
         },
+        advoAssurance: {
+            type: String,
+        },
+        paymentStructure: {
+            type: String,
+        },
     },
     { timestamps: true }
 );
