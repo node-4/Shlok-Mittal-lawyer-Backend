@@ -4,6 +4,7 @@ const whyuserlove = require("../models/whyuserlove");
 const caseManager = require("../models/caseManager");
 const city = require("../models/city");
 const category = require("../models/category.model");
+const Faq = require("../models/faq");
 
 exports.createBlogCategory = async (req, res) => {
         try {
@@ -556,3 +557,69 @@ exports.assignCategoryToCity = async (req, res) => {
                 return res.status(500).send({ msg: "internal server error ", error: err.message, });
         }
 }
+exports.createFaq = async (req, res) => {
+        try {
+                const { question, answer } = req.body;
+                const data = {
+                        question: question,
+                        answer: answer,
+                };
+                const BlogCategory = await Faq.create(data);
+                return res.status(200).json({ message: "Faq add successfully.", status: 200, data: BlogCategory });
+        } catch (error) {
+                return res.status(500).json({ status: 500, message: "internal server error ", data: error.message, });
+        }
+};
+exports.updateFaq = async (req, res) => {
+        try {
+                const findData = await Faq.findById(req.params.id);
+                if (!findData) {
+                        return res.status(400).send({ msg: "not found" });
+                }
+                const data = {
+                        question: req.body.question ?? findData.question,
+                        answer: req.body.answer ?? findData.answer,
+                };
+                const BlogCategory = await Faq.findByIdAndUpdate({ _id: findData._id }, { $set: data }, { new: true })
+                return res.status(200).json({ message: "Faq update successfully.", status: 200, data: BlogCategory });
+        } catch (error) {
+                return res.status(500).json({ status: 500, message: "internal server error ", data: error.message, });
+        }
+};
+exports.getFaq = async (req, res) => {
+        try {
+                const data = await Faq.find({})
+                if (data.length === 0) {
+                        return res.status(400).send({ msg: "not found" });
+                }
+                return res.status(200).json({ status: 200, message: "Faq data found.", data: data });
+        } catch (err) {
+                return res.status(500).send({ msg: "internal server error ", error: err.message, });
+        }
+};
+exports.getFaqById = async (req, res) => {
+        try {
+                const data = await Faq.findById(req.params.id);
+                if (!data) {
+                        return res.status(400).send({ msg: "not found" });
+                }
+                return res.status(200).json({ status: 200, message: "Faq data found.", data: data });
+        } catch (err) {
+                return res.status(500).send({ msg: "internal server error ", error: err.message, });
+        }
+}
+exports.deleteFaq = async (req, res) => {
+        try {
+                const data = await Faq.findById(req.params.id);
+                if (!data) {
+                        return res.status(400).send({ msg: "not found" });
+                }
+                const data1 = await Faq.findByIdAndDelete(req.params.id);
+                if (data1) {
+                        return res.status(200).send({ msg: "deleted", data: data1 });
+                }
+        } catch (err) {
+                console.log(err.message);
+                return res.status(500).send({ msg: "internal server error", error: err.message, });
+        }
+};

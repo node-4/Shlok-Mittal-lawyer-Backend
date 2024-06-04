@@ -156,6 +156,9 @@ var userSchema = new schema(
         languages: {
             type: Array,
         },
+        availability: {
+            type: Array,
+        },
         rating: {
             type: Number,
             default: 0,

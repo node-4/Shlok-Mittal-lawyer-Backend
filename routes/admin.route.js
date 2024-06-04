@@ -113,4 +113,9 @@ module.exports = (app) => {
     app.put("/api/v1/City/updateCity/:id", upload.single('image'), blog.updateCity);
     app.delete("/api/v1/City/deleteCity/:id", blog.deleteCity);
     app.get("/api/v1/City/getCityPopular", blog.getCityPopular);
+    app.post("/api/v1/Faq/createFaq", blog.createFaq);
+    app.get("/api/v1/Faq/getFaq", blog.getFaq);
+    app.get("/api/v1/Faq/getFaqById/:id", blog.getFaqById);
+    app.put("/api/v1/Faq/updateFaq/:id", blog.updateFaq);
+    app.delete("/api/v1/Faq/deleteFaq/:id", blog.deleteFaq);
 };

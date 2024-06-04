@@ -179,7 +179,7 @@ exports.resetPassword = async (req, res) => {
 };
 exports.update = async (req, res) => {
     try {
-        const { fullName, email, phone, password, bio, hearingFee, languages, } = req.body;
+        const { fullName, email, phone, password, bio, hearingFee, availability, languages, consultancyCost } = req.body;
         console.log("==================", req.body);
         const user = await User.findById(req.user._id);
         if (!user) {
@@ -201,7 +201,9 @@ exports.update = async (req, res) => {
             bio: bio || user.bio,
             hearingFee: hearingFee || user.hearingFee,
             languages: languages || user.languages,
-            password: passwords
+            password: passwords,
+            availability: availability || user.availability,
+            consultancyCost: consultancyCost || user.consultancyCost,
         }
         const updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true });
         return res.status(200).send({ message: "updated", data: updated });
@@ -222,8 +224,7 @@ exports.updateProfile = async (req, res) => {
         user.phone = phone || user.phone;
         user.image = image || user.image;
         user.kyc = kyc || user.kyc;
-        user.whatAppNotification =
-            whatAppNotification || user.whatAppNotification;
+        user.whatAppNotification = whatAppNotification || user.whatAppNotification;
         user.blogNotification = blogNotification || user.blogNotification;
         if (req.body.password) {
             user.password = bcrypt.hashSync(password, 8) || user.password;
