@@ -440,15 +440,32 @@ exports.createAppointment = async (req, res) => {
 };
 exports.upcomingAppointment = async (req, res) => {
     try {
-        const FindAppointment = await appointment.find({ lawyer: req.user._id }).populate('lawyer userId case');
-        if (FindAppointment.length == 0) {
-            return res.status(404).json({ message: "upcoming appointment not found", data: {}, status: 404 });
+        let date = new Date(Date.now()).getDate();
+        let month = new Date(Date.now()).getMonth() + 1;
+        let year = new Date(Date.now()).getFullYear();
+        let month1, date1;
+        if (month < 10) {
+            month1 = '' + 0 + month;
         } else {
-            return res.status(200).json({ message: "All upcoming appointment", data: FindAppointment });
+            month1 = month
         }
+        if (date < 10) {
+            date1 = '' + 0 + date;
+        }
+        else {
+            date1 = date
+        }
+        let fullDate = (`${year}-${month1}-${date1}`).toString()
+        const d = new Date(fullDate);
+        let text = d.toISOString();
+        const data = await appointment.find({ lawyer: req.user._id, appointmentDate: { $gte: text }, }).populate('lawyer userId case');
+        if (!data || data.length === 0) {
+            return res.status(404).json({ message: "upcoming appointment not found", data: [], status: 404 });
+        }
+        return res.status(200).json({ message: "All upcoming appointment", data: data });
     } catch (err) {
-        console.log(err);
-        return res.status(400).json({ message: err.message, });
+        console.log(err.message);
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
     }
 };
 exports.allCancelAppointment = async (req, res) => {
@@ -579,7 +596,6 @@ exports.getrefferalCode = async (req, res) => {
         return res.status(501).send({ message: "server error.", data: {}, });
     }
 };
-
 exports.getAllClient = async (req, res) => {
     try {
         const data = await clientModel.find({ lawyer: req.user._id }).populate('clients');

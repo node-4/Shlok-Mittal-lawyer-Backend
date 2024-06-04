@@ -39,6 +39,7 @@ module.exports = (app) => {
     app.get("/api/v1/lawyer/case/all/:caseStatus", [authJwt.verifyToken], auth.getCase);
     app.post("/api/v1/lawyer/Appointment/createAppointment", [authJwt.verifyToken], auth.createAppointment);
     app.get("/api/v1/lawyer/Appointment/upcomingAppointment", [authJwt.verifyToken], auth.upcomingAppointment);
+    app.get("/api/v1/lawyer/case/upcommingCase", [authJwt.verifyToken], auth.upcommingCase);
     app.get("/api/v1/lawyer/allCancelAppointment", [authJwt.verifyToken], auth.allCancelAppointment);
     app.get("/api/v1/lawyer/pastAppointment", [authJwt.verifyToken], auth.pastAppointment);
     app.post("/api/v1/lawyer/document/add", [authJwt.verifyToken], upload.single("image"), document.AddDocument);
