@@ -10,7 +10,7 @@ var newOTP = require("otp-generators");
 const userModel = require("../models/user.model");
 const caseModel = require("../models/cases.model");
 const clientModel = require("../models/clientModel");
-
+const feedback = require("../models/feedback");
 exports.registration = async (req, res) => {
     const { phone, email } = req.body;
     try {
@@ -570,3 +570,65 @@ const reffralCode = async () => {
     }
     return OTP;
 }
+exports.getLawyersWithFilter = async (req, res) => {
+    try {
+        const { search, location, rating } = req.query;
+        let query = { userType: "LAWYER" };
+        if (search) {
+            query.$or = [
+                { fullName: new RegExp(search, 'i') },
+                { firstName: new RegExp(search, 'i') },
+                { lastName: new RegExp(search, 'i') },
+                { email: new RegExp(search, 'i') },
+            ];
+        }
+        if (location) {
+            query.$or = [
+                { firstLineAddress: new RegExp(location, 'i') },
+                { secondLineAddress: new RegExp(location, 'i') },
+                { country: new RegExp(location, 'i') },
+                { state: new RegExp(location, 'i') },
+                { district: new RegExp(location, 'i') },
+            ];
+        }
+        if (rating) {
+            query.rating = { $gte: rating };
+        }
+        const findLawyer = await User.find(query);
+        if (findLawyer.length === 0) {
+            return res.status(404).send({ status: 404, message: "Lawyer not found.", data: [] });
+        }
+        return res.status(200).send({ status: 200, message: "Data found successfully.", data: findLawyer });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).json({ message: "server error while getting lawyer", error: err.message, });
+    }
+};
+
+exports.AddFeedback = async (req, res) => {
+    try {
+        const { Feedback, rating } = req.body;
+        let obj = {
+            userId: req.user._id,
+            Feedback: Feedback,
+            rating: rating
+        }
+        const data = await feedback.create(obj);
+        return res.status(200).json({ details: data })
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({ message: err.message })
+    }
+};
+exports.allFeedback = async (req, res) => {
+    try {
+        const allData = await feedback.find({}).populate('userId');
+        if (!allData || allData.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ status: 200, message: "Data found successfully.", data: allData });
+    } catch (error) {
+        console.log(error);
+        return res.status(501).send({ message: "server error.", data: {}, });
+    }
+};
