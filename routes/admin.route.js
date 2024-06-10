@@ -48,6 +48,7 @@ module.exports = (app) => {
     app.delete('/api/v1/admin/delete/:id', auth.DeleteBanner);
     app.post("/api/v1/admin/createLocation", [authJwt.verifyToken], auth.createLocation);
     app.post("/api/v1/admin/location", auth.getLocation);
+    app.get("/api/v1/admin/location/ByToken", [authJwt.verifyToken], auth.getLocationByUser);
     app.get("/api/v1/admin/location/:id", auth.getLocationId);
     app.patch("/api/v1/admin/location/:id", [authJwt.verifyToken], auth.updateLocation);
     app.delete("/api/v1/admin/location/:id", [authJwt.verifyToken], auth.deleteLocation);

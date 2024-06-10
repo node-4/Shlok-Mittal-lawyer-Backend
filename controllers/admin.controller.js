@@ -974,10 +974,22 @@ exports.createLocation = async (req, res) => {
 };
 exports.getLocation = async (req, res) => {
     try {
-        const data = await Location.find().populate({
-            path: "userId",
-            select: "name",
-        });
+        const data = await Location.find({}).populate({ path: "userId", select: "name", });
+        if (!data || data.length === 0) {
+            return res.status(400).send({ msg: "not found" });
+        }
+        return res.status(200).send({ data: data });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({
+            msg: "internal server error ",
+            error: message,
+        })
+    }
+};
+exports.getLocationByUser = async (req, res) => {
+    try {
+        const data = await Location.find({ userId: req.user._id }).populate({ path: "userId", select: "name", });
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
