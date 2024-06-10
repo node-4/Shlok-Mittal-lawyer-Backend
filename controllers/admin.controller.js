@@ -974,7 +974,7 @@ exports.createLocation = async (req, res) => {
 };
 exports.getLocation = async (req, res) => {
     try {
-        const data = await Location.find({}).populate({ path: "userId", select: "name", });
+        const data = await Location.find({}).populate({ path: "userId", select: "lastName firstName fullName", });
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
@@ -989,7 +989,7 @@ exports.getLocation = async (req, res) => {
 };
 exports.getLocationByUser = async (req, res) => {
     try {
-        const data = await Location.find({ userId: req.user._id }).populate({ path: "userId", select: "name", });
+        const data = await Location.find({ userId: req.user._id }).populate({ path: "userId", select: "lastName firstName fullName", });
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
