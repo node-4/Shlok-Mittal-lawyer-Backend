@@ -590,11 +590,19 @@ exports.updateCategory = async (req, res) => {
 };
 exports.getCategory = async (req, res) => {
     try {
-        const data = await Category.find();
-        if (!data || data.length === 0) {
-            return res.status(400).send({ msg: "not found" });
+        if (req.query.type) {
+            const data = await Category.find({ type: req.query.type });
+            if (!data || data.length === 0) {
+                return res.status(400).send({ msg: "not found" });
+            }
+            return res.status(200).send({ status: 200, message: "Data found", data: data });
+        } else {
+            const data = await Category.find();
+            if (!data || data.length === 0) {
+                return res.status(400).send({ msg: "not found" });
+            }
+            return res.status(200).send({ status: 200, message: "Data found", data: data });
         }
-        return res.status(200).send({ status: 200, message: "Data found", data: data });
     } catch (err) {
         console.log(err.message);
         return res.status(500).send({ msg: "internal server error ", error: err.message, });
