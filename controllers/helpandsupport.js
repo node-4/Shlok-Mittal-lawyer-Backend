@@ -1,7 +1,6 @@
 const helpandSupport = require("../models/helpandsupport");
 exports.AddQuery = async (req, res) => {
     try {
-        req.body.user = req.user._id;
         const Data = await helpandSupport.create(req.body);
         return res.status(200).json({ message: Data, });
     } catch (err) {
