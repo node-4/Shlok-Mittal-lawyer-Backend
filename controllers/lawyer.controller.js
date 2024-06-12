@@ -620,3 +620,38 @@ const reffralCode = async () => {
     }
     return OTP;
 }
+
+exports.getCustomerWithFilter = async (req, res) => {
+    try {
+        const { search, location, rating } = req.query;
+        let query = { userType: "CUSTOMER" };
+        if (search) {
+            query.$or = [
+                { fullName: new RegExp(search, 'i') },
+                { firstName: new RegExp(search, 'i') },
+                { lastName: new RegExp(search, 'i') },
+                { email: new RegExp(search, 'i') },
+            ];
+        }
+        if (location) {
+            query.$or = [
+                { firstLineAddress: new RegExp(location, 'i') },
+                { secondLineAddress: new RegExp(location, 'i') },
+                { country: new RegExp(location, 'i') },
+                { state: new RegExp(location, 'i') },
+                { district: new RegExp(location, 'i') },
+            ];
+        }
+        if (rating) {
+            query.rating = { $gte: rating };
+        }
+        const findLawyer = await User.find(query);
+        if (findLawyer.length === 0) {
+            return res.status(404).send({ status: 404, message: "Lawyer not found.", data: [] });
+        }
+        return res.status(200).send({ status: 200, message: "Data found successfully.", data: findLawyer });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).json({ message: "server error while getting lawyer", error: err.message, });
+    }
+};
