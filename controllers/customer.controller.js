@@ -175,7 +175,7 @@ exports.resetPassword = async (req, res) => {
 };
 exports.update = async (req, res) => {
     try {
-        const { firstName, lastName, email, phone, kyc, whatAppNotification, image, blogNotification, } = req.body;
+        const { firstName, lastName, email, phone, kyc, whatAppNotification, image, blogNotification } = req.body;
         const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
@@ -183,21 +183,25 @@ exports.update = async (req, res) => {
         let fileUrl;
         if (req.file) {
             fileUrl = req.file ? req.file.path : "";
+        } else {
+            fileUrl = user.image
         }
         let password;
         if (req.body.password) {
             password = bcrypt.hashSync(req.body.password, 8)
+        } else {
+            password = user.password
         }
         let obj = {
             firstName: firstName || user.firstName,
             lastName: lastName || user.lastName,
             email: email || user.email,
             phone: phone || user.phone,
-            image: fileUrl || user.image,
+            image: fileUrl,
             kyc: kyc || user.kyc,
             whatAppNotification: whatAppNotification || user.whatAppNotification,
             blogNotification: blogNotification || user.blogNotification,
-            password: password || user.password
+            password: password,
         }
         console.log(obj);
         let updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true })

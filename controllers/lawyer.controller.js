@@ -179,7 +179,7 @@ exports.resetPassword = async (req, res) => {
 };
 exports.update = async (req, res) => {
     try {
-        const { fullName, email, phone, password, bio, hearingFee, availability, languages, consultancyCost } = req.body;
+        const { fullName, email, phone, password, bio, hearingFee, availability, languages, consultancyCost, lawyerStatus } = req.body;
         console.log("==================", req.body);
         const user = await User.findById(req.user._id);
         if (!user) {
@@ -188,22 +188,27 @@ exports.update = async (req, res) => {
         let fileUrl;
         if (req.file) {
             fileUrl = req.file ? req.file.path : "";
+        } else {
+            fileUrl = user.image
         }
         let passwords;
         if (req.body.password) {
             passwords = bcrypt.hashSync(req.body.password, 8) || user.password;
+        } else {
+            password = user.password
         }
         let obj = {
             fullName: fullName || user.fullName,
             email: email || user.email,
             phone: phone || user.phone,
-            image: fileUrl || user.image,
+            image: fileUrl,
             bio: bio || user.bio,
             hearingFee: hearingFee || user.hearingFee,
             languages: languages || user.languages,
             password: passwords,
             availability: availability || user.availability,
             consultancyCost: consultancyCost || user.consultancyCost,
+            lawyerStatus: lawyerStatus || user.lawyerStatus,
         }
         const updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true });
         return res.status(200).send({ message: "updated", data: updated });

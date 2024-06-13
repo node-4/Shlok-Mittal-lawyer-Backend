@@ -110,6 +110,10 @@ var userSchema = new schema(
             default: "Pending",
             enum: ["Active", "Block", "Pending"],
         },
+        lawyerStatus: {
+            type: Boolean,
+            default: false,
+        },
         kyc: {
             type: String,
             default: "",
