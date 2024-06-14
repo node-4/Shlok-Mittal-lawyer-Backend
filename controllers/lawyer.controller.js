@@ -577,6 +577,7 @@ exports.upcommingCase = async (req, res) => {
 };
 exports.getAllRating = async (req, res) => {
     try {
+        console.log(req.user)
         const data = await rating.find({ lawyerId: req.user._id }).populate('userId');
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
