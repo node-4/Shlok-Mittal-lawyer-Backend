@@ -17,6 +17,73 @@ const CourtCategory = require("../models/courtCategory.model");
 const Court = require("../models/court.model");
 const ContactDetail = require("../models/ContactDetail");
 const appointment = require("../models/appointment.model");
+
+exports.forgetPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        req.body.email = email.split(" ").join("").toLowerCase();
+        const data = await User.findOne({ email: req.body.email, userType: "ADMIN" });
+        if (!data) {
+            return res.status(400).send({ status: 400, data: {}, msg: "Incorrect email or password" });
+        } else {
+            let otp = newOTP.generate(4, { alphabets: false, upperCase: false, specialChar: false, });
+            // var transporter = nodemailer.createTransport({ timeout: 600000, pool: true, service: 'gmail', auth: { "user": "info@shahinahoja.com", "pass": "zsukilrhowwtjsoh" } });
+            // let mailOptions;
+            // mailOptions = { from: 'Shahina Hoja Aesthetics <info@shahinahoja.com>', to: req.body.email, subject: 'Password verification', text: `Your Account Verification Code is ${otp}`, };
+            // let info = await transporter.sendMail(mailOptions);
+            // if (info) {
+            let accountVerification = false;
+            let otpExpiration = new Date(Date.now() + 5 * 60 * 1000);
+            const updated = await User.findOneAndUpdate({ _id: data._id }, { $set: { accountVerification: accountVerification, otp: otp, otpExpiration: otpExpiration } }, { new: true, });
+            if (updated) {
+                return res.status(200).json({ message: "Otp send to your email.", status: 200, data: updated });
+            }
+            // } else {
+            //     return res.status(200).json({ message: "Otp not send on your mail please check.", status: 200, data: {} });
+            // }
+        }
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({ msg: "internal server error", error: err.message, });
+    }
+};
+exports.forgotVerifyotp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        req.body.email = email.split(" ").join("").toLowerCase();
+        const user = await User.findOne({ email: req.body.email, userType: "ADMIN" });
+        if (!user) {
+            return res.status(404).send({ message: "user not found" });
+        }
+        if (user.otp !== otp || user.otpExpiration < Date.now()) {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+        const updated = await User.findByIdAndUpdate({ _id: user._id }, { accountVerification: true }, { new: true });
+        let obj = { userId: updated._id, otp: updated.otp, }
+        return res.status(200).send({ status: 200, message: "Verify otp successfully", data: obj });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).send({ error: "internal server error" + err.message });
+    }
+};
+exports.changePassword = async (req, res) => {
+    try {
+        const user = await User.findOne({ _id: req.params.id });
+        if (user) {
+            if (req.body.newPassword == req.body.confirmPassword) {
+                const updated = await User.findOneAndUpdate({ _id: user._id }, { $set: { password: bcrypt.hashSync(req.body.newPassword), accountVerification: true } }, { new: true });
+                return res.status(200).send({ message: "Password update successfully.", data: updated, });
+            } else {
+                return res.status(501).send({ message: "Password Not matched.", data: {}, });
+            }
+        } else {
+            return res.status(404).json({ status: 404, message: "No data found", data: {} });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+    }
+};
 exports.registration = async (req, res) => {
     const { phone, email } = req.body;
     try {

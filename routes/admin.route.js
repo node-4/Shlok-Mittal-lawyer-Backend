@@ -12,6 +12,9 @@ const upload = multer({ storage: storage });
 var cpUpload = upload.fields([{ name: 'barRegistrationImage', maxCount: 1 }, { name: 'barCertificateImage', maxCount: 1 }, { name: 'aadhar', maxCount: 1 }]);
 var cp1Upload = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'descriptionImage', maxCount: 10 }]);
 module.exports = (app) => {
+    app.post("/api/v1/admin/forgetPassword", auth.forgetPassword);
+    app.post("/api/v1/admin/forgotVerifyotp", auth.forgotVerifyotp);
+    app.post("/api/v1/admin/changePassword/:id", auth.changePassword);
     app.post("/api/v1/admin/registration", auth.registration);
     app.post("/api/v1/admin/login", auth.signin);
     app.put("/api/v1/admin/update", [authJwt.verifyToken], auth.update);
