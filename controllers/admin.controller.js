@@ -88,7 +88,7 @@ exports.registration = async (req, res) => {
     const { phone, email } = req.body;
     try {
         req.body.email = email.split(" ").join("").toLowerCase();
-        let user = await User.findOne({ $and: [{ $or: [{ email: req.body.email }, { phone: phone }] }], userType: "ADMIN" });
+        let user = await User.findOne({ $and: [{ $or: [{ email: req.body.email }] }], userType: "ADMIN" });
         if (!user) {
             req.body.password = bcrypt.hashSync(req.body.password, 8);
             req.body.userType = "ADMIN";
