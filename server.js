@@ -26,19 +26,11 @@ require("./routes/static.route")(app);
 require("./routes/helpandsupport.route")(app);
 mongoose.Promise = global.Promise;
 mongoose.set("strictQuery", true);
-
-mongoose.connect(process.env.DB_URL, (err) => {
-    if (!err) {
-        console.log("MongoDB Connection Succeeded.");
-    } else {
-        console.log("Error in DB connection: " + err);
-    }
+mongoose.connect(process.env.DB_URL).then((data) => {
+    console.log(`Mongodb connected with server: ${data.connection.host} : Shlok`);
 });
-
 app.listen(process.env.PORT, () => {
     console.log(`Listening on port ${process.env.PORT}!`);
 });
-
-
 module.exports = app;
 module.exports.handler = serverless(app);
