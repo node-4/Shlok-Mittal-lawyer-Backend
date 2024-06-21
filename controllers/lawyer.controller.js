@@ -109,19 +109,10 @@ exports.loginWithPhone = async (req, res) => {
             return res.status(400).send({ msg: "not found" });
         }
         const userObj = {};
-        userObj.otp = newOTP.generate(4, {
-            alphabets: false,
-            upperCase: false,
-            specialChar: false,
-        });
+        userObj.otp = newOTP.generate(4, { alphabets: false, upperCase: false, specialChar: false, });
         userObj.otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
         userObj.accountVerification = false;
-        const updated = await User.findOneAndUpdate(
-            { phone: phone, userType: "LAWYER" },
-            userObj,
-            {
-                new: true,
-            }
+        const updated = await User.findOneAndUpdate({ phone: phone, userType: "LAWYER" }, { $set: userObj }, { new: true, }
         );
         return res.status(200).send({ userId: updated._id, otp: updated.otp });
     } catch (error) {
@@ -207,11 +198,7 @@ exports.resendOTP = async (req, res) => {
         });
         const otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
         const accountVerification = false;
-        const updated = await User.findOneAndUpdate(
-            { _id: user._id },
-            { otp, otpExpiration, accountVerification },
-            { new: true }
-        );
+        const updated = await User.findOneAndUpdate({ _id: user._id }, { $set: { otp, otpExpiration, accountVerification } }, { new: true });
         return res.status(200).send({ message: "OTP resent", otp: otp });
     } catch (error) {
         console.error(error);

@@ -115,9 +115,7 @@ exports.loginWithPhone = async (req, res) => {
         });
         userObj.otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
         userObj.accountVerification = false;
-        const updated = await User.findOneAndUpdate({ phone: phone, userType: "CUSTOMER" }, userObj, {
-            new: true,
-        });
+        const updated = await User.findOneAndUpdate({ phone: phone, userType: "CUSTOMER" }, { $set: userObj }, { new: true, });
         return res.status(200).send({ userId: updated._id, otp: updated.otp });
     } catch (error) {
         console.error(error);
@@ -198,11 +196,7 @@ exports.resendOTP = async (req, res) => {
             specialChar: false,
         });
         const otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
-        const updated = await User.findOneAndUpdate(
-            { _id: id },
-            { otp, otpExpiration },
-            { new: true }
-        );
+        const updated = await User.findOneAndUpdate({ _id: id }, { $set: { otp, otpExpiration } }, { new: true });
         return res.status(200).send({ message: "OTP resent", otp: otp });
     } catch (error) {
         console.error(error);
@@ -217,11 +211,7 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).send({ message: "User not found" });
         }
         if (req.body.newPassword == req.body.confirmPassword) {
-            const updated = await User.findOneAndUpdate(
-                { _id: id },
-                { $set: { password: bcrypt.hashSync(req.body.newPassword) } },
-                { new: true }
-            );
+            const updated = await User.findOneAndUpdate({ _id: id }, { $set: { password: bcrypt.hashSync(req.body.newPassword) } }, { new: true });
             return res.status(200).send({
                 message: "Password update successfully.",
                 data: updated,
