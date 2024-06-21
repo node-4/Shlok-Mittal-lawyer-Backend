@@ -115,7 +115,7 @@ exports.loginWithPhone = async (req, res) => {
         });
         userObj.otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
         userObj.accountVerification = false;
-        const updated = await User.findOneAndUpdate({ phone: phone }, userObj, {
+        const updated = await User.findOneAndUpdate({ phone: phone, userType: "CUSTOMER" }, userObj, {
             new: true,
         });
         return res.status(200).send({ userId: updated._id, otp: updated.otp });

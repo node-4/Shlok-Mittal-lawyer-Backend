@@ -66,6 +66,7 @@ exports.getAllNotifications = async (req, res) => {
                 }
                 return res.status(200).json({ status: 200, message: 'Notification found', data: notification });
             } else {
+                console.log(req.user._id)
                 const notification = await Notification.find({ userId: req.user._id, isEnable: true }).sort({ updatedAt: -1 });
                 if (!notification || notification.length === 0) {
                     return res.status(404).json({ message: 'Notification not found' });
