@@ -19,6 +19,9 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage: storage });
 module.exports = (app) => {
+    app.post("/api/v1/customer/forgetPassword", auth.forgetPassword);
+    app.post("/api/v1/customer/forgotVerifyotp", auth.forgotVerifyotp);
+    app.post("/api/v1/customer/changePassword/:id", auth.changePassword);
     app.post("/api/v1/customer/registration", auth.registration);
     app.post("/api/v1/customer/login", auth.loginWithPhone);
     app.post("/api/v1/customer/signin", [validateUser.signInBody], auth.signin);

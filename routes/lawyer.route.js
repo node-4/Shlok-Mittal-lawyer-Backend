@@ -25,6 +25,9 @@ var cpUpload = upload.fields([{ name: 'barRegistrationImage', maxCount: 1 },
 
 
 module.exports = (app) => {
+    app.post("/api/v1/lawyer/forgetPassword", auth.forgetPassword);
+    app.post("/api/v1/lawyer/forgotVerifyotp", auth.forgotVerifyotp);
+    app.post("/api/v1/lawyer/changePassword/:id", auth.changePassword);
     app.post("/api/v1/lawyer/registration", cpUpload, auth.registration);
     app.post("/api/v1/lawyer/login", auth.loginWithPhone);
     app.post("/api/v1/lawyer/signin", [validateUser.signInBody], auth.signin);
