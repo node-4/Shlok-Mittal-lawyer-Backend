@@ -17,7 +17,7 @@ module.exports = (app) => {
     app.post("/api/v1/admin/changePassword/:id", auth.changePassword);
     app.post("/api/v1/admin/registration", auth.registration);
     app.post("/api/v1/admin/login", auth.signin);
-    app.put("/api/v1/admin/update", [authJwt.verifyToken], auth.update);
+    app.put("/api/v1/admin/update", [authJwt.verifyToken], upload.single("image"), auth.update);
     app.get("/api/v1/admin/dashboard", [authJwt.verifyToken], auth.dashboard);
     app.get("/api/v1/admin/lawyer", [authJwt.verifyToken], auth.getLawyers);
     app.post("/api/v1/admin/CreateLawyer", [authJwt.verifyToken], cpUpload, auth.CreateLawyer);

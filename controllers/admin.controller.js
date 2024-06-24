@@ -129,19 +129,27 @@ exports.signin = async (req, res) => {
 };
 exports.update = async (req, res) => {
     try {
-        const { fullName, firstName, lastName, email, phone, password, image } = req.body;
+        const { fullName, firstName, lastName, email, phone, password } = req.body;
         const user = await User.findById(req.params.id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
+        }
+        let fileUrl;
+        if (req.file) {
+            fileUrl = req.file ? req.file.path : "";
+        } else {
+            fileUrl = user.image
         }
         user.fullName = fullName || user.fullName;
         user.firstName = firstName || user.firstName;
         user.lastName = lastName || user.lastName;
         user.email = email || user.email;
         user.phone = phone || user.phone;
-        user.image = image || user.image;
+        user.image = fileUrl;
         if (req.body.password) {
             user.password = bcrypt.hashSync(password, 8) || user.password;
+        } else {
+            user.password = user.password;
         }
         const updated = await user.save();
         // console.log(updated);
