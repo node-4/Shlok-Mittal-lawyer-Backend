@@ -130,7 +130,7 @@ exports.signin = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const { fullName, firstName, lastName, email, phone, password } = req.body;
-        const user = await User.findById(req.params.id);
+        const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
         }
