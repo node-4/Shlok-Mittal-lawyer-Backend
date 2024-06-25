@@ -11,6 +11,11 @@ const schema = new mongoose.Schema(
             ref: "user",
             required: true,
         },
+        categoryId: [{
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: "category",
+            required: true,
+        }],
         rating: {
             type: Number,
         },

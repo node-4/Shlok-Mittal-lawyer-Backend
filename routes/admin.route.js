@@ -44,6 +44,9 @@ module.exports = (app) => {
     app.get("/api/v1/category/:id", auth.getCategoryId);
     app.patch("/api/v1/category/:id", [authJwt.verifyToken], upload.single("image"), auth.updateCategory);
     app.delete("/api/v1/category/:id", [authJwt.verifyToken], auth.deleteCategory);
+    app.put("/api/v1/category/addFaqInCategory/:id", auth.addFaqInCategory);
+    app.put("/api/v1/category/addAdvoAssuranceInCategory/:id", upload.single("image"), auth.addAdvoAssuranceInCategory);
+    app.put("/api/v1/category/deleteFaqsInCategoryFAQ/:id/:faqsId", auth.deleteFaqsInCategoryFAQ);
     app.post('/api/v1/admin/CreateBanner', upload.single("image"), auth.AddBanner);
     app.get('/api/v1/admin/AllBanner', auth.getBanner);
     app.put('/api/v1/admin/updateBanner/:id', upload.single("image"), auth.updateBanner);

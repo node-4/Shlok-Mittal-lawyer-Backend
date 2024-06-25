@@ -17,6 +17,7 @@ const CourtCategory = require("../models/courtCategory.model");
 const Court = require("../models/court.model");
 const ContactDetail = require("../models/ContactDetail");
 const appointment = require("../models/appointment.model");
+const rating = require("../models/rating.model");
 
 exports.forgetPassword = async (req, res) => {
     try {
@@ -637,6 +638,8 @@ exports.createCategory = async (req, res) => {
                 type: req.body.type,
                 category: req.body.category,
                 info: req.body.info,
+                document: req.body.document,
+                payment: req.body.payment,
             };
             const category = await Category.create(data);
             return res.status(200).json({ message: "Category add successfully.", status: 200, data: category });
@@ -660,6 +663,9 @@ exports.updateCategory = async (req, res) => {
     category.type = req.body.type || category.type;
     category.category = req.body.category || category.category;
     category.info = req.body.info || category.info;
+    category.document = req.body.document || category.document;
+    category.payment = req.body.payment || category.payment;
+    category.advoAssurance = req.body.advoAssurance || category.advoAssurance;
     let update = await category.save();
     return res.status(200).json({ message: "Updated Successfully", data: update });
 };
@@ -689,7 +695,8 @@ exports.getCategoryId = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
-        return res.status(200).send({ data: data });
+        const allData = await rating.find({ categoryId: { $in: data._id } }).populate('userId lawyerId');
+        return res.status(200).send({ data: data, rating: allData });
     } catch (err) {
         console.log(err.message);
         return res.status(500).send({
@@ -711,6 +718,82 @@ exports.deleteCategory = async (req, res) => {
             msg: "internal server error",
             error: err.message,
         });
+    }
+};
+exports.addFaqInCategory = async (req, res) => {
+    try {
+        const { answer, question } = req.body;
+        const findBanner = await Category.findOne({ _id: req.params.id });
+        if (findBanner) {
+            let data = {
+                answer: answer,
+                question: question,
+            }
+            const newCategory = await Category.findByIdAndUpdate({ _id: findBanner._id }, { $push: { faqs: data } }, { new: true });
+            return res.status(200).json({ status: 200, message: 'Category faqs update successfully', data: newCategory });
+        } else {
+            return res.status(200).json({ status: 200, message: 'Category faqs not found.', data: newCategory });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Failed to create faq' });
+    }
+};
+exports.deleteFaqsInCategoryFAQ = async (req, res) => {
+    try {
+        const findCart = await Category.findOne({ _id: req.params.id });
+        if (findCart) {
+            for (let i = 0; i < findCart.faqs.length; i++) {
+                if (findCart.faqs.length > 1) {
+                    if (((findCart.faqs[i]._id).toString() == req.params.faqsId) == true) {
+                        let updateCart = await Category.findByIdAndUpdate({ _id: findCart._id, 'faqs._id': req.params.faqsId }, {
+                            $pull: {
+                                'faqs':
+                                {
+                                    _id: req.params.faqsId,
+                                    question: findCart.faqs[i].question,
+                                    answer: findCart.faqs[i].answer,
+                                }
+                            }
+                        }, { new: true })
+                        if (updateCart) {
+                            return res.status(200).send({ message: "Description Array delete from Blog.", data: updateCart, });
+                        }
+                    }
+                } else {
+                    return res.status(200).send({ status: 200, message: "No Data Found ", data: [] });
+                }
+            }
+        } else {
+            return res.status(200).send({ status: 200, message: "No Data Found ", cart: [] });
+        }
+    } catch (error) {
+        return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+    }
+};
+exports.addAdvoAssuranceInCategory = async (req, res) => {
+    try {
+        const { title, description } = req.body;
+        const findBanner = await Category.findOne({ _id: req.params.id });
+        if (findBanner) {
+            if (req.file) {
+                image = req.file ? req.file.path : "";
+            } else {
+                return res.status(404).json({ status: 404, message: 'advoAssurance image not found.', data: {} });
+            }
+            let data = {
+                image: image,
+                title: title,
+                description: description,
+            }
+            const newCategory = await Category.findByIdAndUpdate({ _id: findBanner._id }, { $push: { advoAssurance: data } }, { new: true });
+            return res.status(200).json({ status: 200, message: 'Category faqs update successfully', data: newCategory });
+        } else {
+            return res.status(200).json({ status: 200, message: 'Category faqs not found.', data: newCategory });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Failed to create faq' });
     }
 };
 exports.AddBanner = async (req, res) => {
@@ -805,7 +888,6 @@ exports.DeleteBanner = async (req, res) => {
         })
     }
 };
-
 exports.createCourtCategory = async (req, res) => {
     try {
         const courtCategory = { name: req.body.name, type: "Court" };

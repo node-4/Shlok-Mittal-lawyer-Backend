@@ -510,6 +510,7 @@ exports.giveRating = async (req, res) => {
             let data = {
                 userId: req.user._id,
                 lawyerId: req.params.id,
+                categoryId: findUser.categoryId,
                 rating: req.body.rating,
                 comment: req.body.comment,
                 subject: req.body.subject,
@@ -524,7 +525,6 @@ exports.giveRating = async (req, res) => {
             allData.forEach((rev) => {
                 avg += rev.rating;
             });
-
             let ratings = avg / allData.length;
             await User.findByIdAndUpdate({ _id: findUser._id }, { $set: { rating: ratings } }, { new: true });
             return res.status(200).json(Data);
