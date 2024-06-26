@@ -12,28 +12,28 @@ exports.AddDocument = async (req, res) => {
                 image = req.file.path
             }
             const data = { casesId: cases._id, userId: cases.userId, lawyerId: cases.lawyer, image: image, desc: req.body.desc, };
-            const Data = await userDocuments.create(data);
-            if (Data) {
+            const Data1 = await userDocuments.create(data);
+            if (Data1) {
                 const usersDocument = await saveDocuments.findOne({ userId: cases.userId, });
                 if (usersDocument) {
                     let documents = [];
-                    let obj = { id: Data._id };
+                    let obj = { id: Data1._id };
                     documents.push(obj);
                     for (let i = 0; i < usersDocument.documents.length; i++) {
                         documents.push(usersDocument.documents[i]);
                     }
                     let update = await saveDocuments.findByIdAndUpdate({ _id: usersDocument._id }, { $set: { documents: documents } }, { new: true });
-                    let update1 = await caseModel.findByIdAndUpdate({ _id: cases._id }, { $push: { notes: Data._id } }, { new: true });
+                    let update1 = await caseModel.findByIdAndUpdate({ _id: cases._id }, { $push: { notes: Data1._id } }, { new: true });
                     if (update1) {
-                        return res.status(200).json({ message: "Document is Addded ", data: Data, });
+                        return res.status(200).json({ message: "Document is Addded ", data: Data1, });
                     }
                 } else {
                     let documents = [];
-                    let obj = { id: Data._id };
+                    let obj = { id: Data1._id };
                     documents.push(obj);
                     const data = { userId: cases.userId, documents: documents };
-                    const Data = await saveDocuments.create(data);
-                    let update = await caseModel.findByIdAndUpdate({ _id: cases._id }, { $push: { notes: Data._id } }, { new: true });
+                    const usersDocument = await saveDocuments.create(data);
+                    let update = await caseModel.findByIdAndUpdate({ _id: cases._id }, { $push: { notes: Data1._id } }, { new: true });
                     if (update) {
                         return res.status(200).json({ message: "Document is Addded ", data: Data, });
                     }
