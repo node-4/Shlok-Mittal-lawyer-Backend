@@ -695,8 +695,9 @@ exports.getCategoryId = async (req, res) => {
         if (!data || data.length === 0) {
             return res.status(400).send({ msg: "not found" });
         }
+        const findLawyer = await User.find({ categoryId: { $in: data._id }, userType: "LAWYER" }).populate('categoryId');
         const allData = await rating.find({ categoryId: { $in: data._id } }).populate('userId lawyerId');
-        return res.status(200).send({ data: data, rating: allData });
+        return res.status(200).send({ data: data, rating: allData, lawyer: findLawyer });
     } catch (err) {
         console.log(err.message);
         return res.status(500).send({

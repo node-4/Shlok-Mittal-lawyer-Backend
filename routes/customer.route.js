@@ -61,5 +61,6 @@ module.exports = (app) => {
     app.post("/api/v1/user/AddFeedback", [authJwt.verifyToken], auth.AddFeedback);
     app.get("/api/v1/user/allFeedback", auth.allFeedback);
     app.get("/api/v1/user/getLawyersWithFilter", auth.getLawyersWithFilter);
+    app.post("/api/v1/user/withdrawRequest", [authJwt.verifyToken], auth.withdrawRequest);
 
 };

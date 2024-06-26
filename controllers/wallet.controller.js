@@ -100,3 +100,57 @@ exports.allTransaction = async (req, res) => {
                 return res.status(400).json({ message: err.message });
         }
 };
+exports.withdrawApprove = async (req, res, next) => {
+        try {
+                console.log(req.params.id)
+                let data = await transaction.findOne({ _id: req.params.id });
+                if (!data) {
+                        return res.status(404).send({ status: 404, message: "Data not found ", data: {} });
+                } else {
+                        if (data.status == "PAID") {
+                                return res.status(409).send({ status: 409, message: "Already Paid ", data: {} });
+                        } else {
+                                if (req.body.status == "PAID") {
+                                        if (req.file) {
+                                                req.body.screenShot = req.file.path;
+                                                let update = await transaction.findByIdAndUpdate({ _id: data._id }, { $set: req.body }, { new: true });
+                                                if (update) {
+                                                        let findUser = await User.findOne({ _id: data.userId });
+                                                        let amount = (parseFloat(findUser.wallet) - parseFloat(update.amount)).toFixed(2)
+                                                        await User.findByIdAndUpdate({ _id: data.userId }, { $set: { wallet: amount } }, { new: true });
+                                                        return res.status(200).send({ status: 200, message: "Send money to driver successfully ", data: update });
+                                                }
+                                        }
+                                } else if (req.body.status == "PENDING") {
+                                        if (req.file) {
+                                                req.body.screenShot = req.file.path;
+                                                let update = await transaction.findByIdAndUpdate({ _id: data._id }, { $set: req.body }, { new: true });
+                                                if (update) {
+                                                        return res.status(200).send({ status: 200, message: "Send money to driver successfully ", data: update });
+                                                }
+                                        } else {
+                                                let update = await transaction.findByIdAndUpdate({ _id: data._id }, { $set: req.body }, { new: true });
+                                                if (update) {
+                                                        return res.status(200).send({ status: 200, message: "Send money to driver successfully ", data: update });
+                                                }
+                                        }
+                                } else {
+                                        if (req.file) {
+                                                req.body.screenShot = req.file.path;
+                                                let update = await transaction.findByIdAndUpdate({ _id: data._id }, { $set: req.body }, { new: true });
+                                                if (update) {
+                                                        return res.status(200).send({ status: 200, message: "Send money to driver successfully ", data: update });
+                                                }
+                                        } else {
+                                                let update = await transaction.findByIdAndUpdate({ _id: data._id }, { $set: req.body }, { new: true });
+                                                if (update) {
+                                                        return res.status(200).send({ status: 200, message: "Send money to driver successfully ", data: update });
+                                                }
+                                        }
+                                }
+                        }
+                }
+        } catch (error) {
+                return res.status(500).json({ status: 500, message: "Internal server error", data: error, });
+        }
+};

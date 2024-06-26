@@ -11,6 +11,8 @@ const userModel = require("../models/user.model");
 const caseModel = require("../models/cases.model");
 const clientModel = require("../models/clientModel");
 const feedback = require("../models/feedback");
+const ifsc = require('ifsc');
+const transaction = require('../models/transactionModel');
 exports.forgetPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -685,5 +687,65 @@ exports.allFeedback = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(501).send({ message: "server error.", data: {}, });
+    }
+};
+exports.withdrawRequest = async (req, res, next) => {
+    try {
+        let user = await User.findOne({ _id: req.user._id });
+        if (!user) {
+            return res.status(404).send({ status: 404, message: "user not found ", data: {} });
+        } else {
+            if (user.wallet < req.body.amount) {
+                return res.status(403).json({ status: 403, message: "In sufficient money.", data: {}, });
+            } else {
+                let transactionFind = await transaction.findOne({ amount: req.body.amount, user: user._id, status: "PENDING" });
+                if (transactionFind) {
+                    return res.status(409).send({ status: 409, message: "Already exit ", data: {} });
+                } else {
+                    req.body.id = await reffralCode();
+                    if (req.body.paymentMode == "BANK") {
+                        let data1 = req.body.ifsc
+                        let data2 = data1.toUpperCase()
+                        let data = await ifsc.fetchDetails(data2);
+                        req.body.user = user._id;
+                        req.body.bank = data.BANK;
+                        req.body.ifsc = data.IFSC;
+                        req.body.type = "Debit";
+                        let transaction1 = await transaction(req.body).save();
+                        if (transaction1) {
+                            return res.status(200).json({ status: 200, message: "Your payment request sent successfully", data: transaction1, });
+                        }
+                    } else if (req.body.paymentMode == "GOOGLE_PAY") {
+                        req.body.user = user._id;
+                        req.body.name = req.body.name;
+                        req.body.mobileNumber = req.body.mobileNumber;
+                        req.body.upiMobile = "MOBILE"
+                        req.body.type = "Debit";
+                        req.body.message = req.body.message;
+                        let transaction1 = await transaction(req.body).save();
+                        if (transaction1) {
+                            return res.status(200).json({ status: 200, message: "Your payment request sent successfully", data: transaction1, });
+                        }
+                    } else {
+                        req.body.user = user._id;
+                        req.body.mobileNumber = req.body.mobileNumber;
+                        req.body.name = req.body.name;
+                        req.body.message = req.body.message;
+                        req.body.type = "Debit";
+                        let transaction1 = await transaction(req.body).save();
+                        if (transaction1) {
+                            return res.status(200).json({ status: 200, message: "Your payment request sent successfully", data: transaction1, });
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        if (error == 'Invalid IFSC Code') {
+            return res.status(404).json({ status: 404, message: "Invalid IFSC Code", data: {}, });
+        } else {
+            return res.status(500).json({ status: 500, message: "Internal server error", data: error.message, });
+        }
+
     }
 };

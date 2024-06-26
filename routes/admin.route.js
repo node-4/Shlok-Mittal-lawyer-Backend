@@ -1,5 +1,6 @@
 const { validateUser } = require("../middlewares");
 const auth = require("../controllers/admin.controller");
+const wallet = require("../controllers/wallet.controller");
 const blog = require("../controllers/blog");
 const { authJwt, authorizeRoles } = require("../middlewares");
 var multer = require("multer");
@@ -125,4 +126,5 @@ module.exports = (app) => {
     app.get("/api/v1/Faq/getFaqById/:id", blog.getFaqById);
     app.put("/api/v1/Faq/updateFaq/:id", blog.updateFaq);
     app.delete("/api/v1/Faq/deleteFaq/:id", blog.deleteFaq);
+    app.post("/api/v1/admin/withdrawApprove/:id", wallet.withdrawApprove);
 };

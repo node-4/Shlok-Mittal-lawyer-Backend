@@ -15,12 +15,40 @@ const transactionSchema = mongoose.Schema({
     paymentMode: {
         type: String,
     },
-    type:{
+    type: {
         type: String,
+    },
+    accountNumber: {
+        type: String
+    },
+    id: {
+        type: String,
+    },
+    ifsc: {
+        type: String
+    },
+    upiId: {
+        type: String
+    },
+    name: {
+        type: String
+    },
+    mobileNumber: {
+        type: String
+    },
+    message: {
+        type: String
+    },
+    paymentReply: {
+        type: String
+    },
+    screenShot: {
+        type: String
     },
     Status: {
         type: String,
     },
+
 });
 
 const transaction = mongoose.model("transaction", transactionSchema);
