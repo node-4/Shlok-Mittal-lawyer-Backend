@@ -1,5 +1,6 @@
 const userDocuments = require("../models/document");
 const caseModel = require("../models/cases.model");
+const saveDocuments = require("../models/saveDocument");
 
 exports.AddDocument = async (req, res) => {
     try {
@@ -13,9 +14,29 @@ exports.AddDocument = async (req, res) => {
             const data = { casesId: cases._id, userId: cases.userId, lawyerId: cases.lawyer, image: image, desc: req.body.desc, };
             const Data = await userDocuments.create(data);
             if (Data) {
-                let update = await caseModel.findByIdAndUpdate({ _id: cases._id }, { $push: { notes: Data._id } }, { new: true });
-                if (update) {
-                    return res.status(200).json({ message: "Document is Addded ", data: Data, });
+                const usersDocument = await saveDocuments.findOne({ userId: cases.userId, });
+                if (usersDocument) {
+                    let documents = [];
+                    let obj = { id: Data._id };
+                    documents.push(obj);
+                    for (let i = 0; i < usersDocument.documents.length; i++) {
+                        documents.push(usersDocument.documents[i]);
+                    }
+                    let update = await saveDocuments.findByIdAndUpdate({ _id: usersDocument._id }, { $set: { documents: documents } }, { new: true });
+                    let update1 = await caseModel.findByIdAndUpdate({ _id: cases._id }, { $push: { notes: Data._id } }, { new: true });
+                    if (update1) {
+                        return res.status(200).json({ message: "Document is Addded ", data: Data, });
+                    }
+                } else {
+                    let documents = [];
+                    let obj = { id: Data._id };
+                    documents.push(obj);
+                    const data = { userId: cases.userId, documents: documents };
+                    const Data = await saveDocuments.create(data);
+                    let update = await caseModel.findByIdAndUpdate({ _id: cases._id }, { $push: { notes: Data._id } }, { new: true });
+                    if (update) {
+                        return res.status(200).json({ message: "Document is Addded ", data: Data, });
+                    }
                 }
             }
         } else {

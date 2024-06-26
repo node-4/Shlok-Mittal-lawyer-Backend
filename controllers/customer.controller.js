@@ -323,10 +323,7 @@ exports.SaveDocument = async (req, res) => {
             }
         }
     } catch (error) {
-        return res.status(501).send({
-            message: "server error.",
-            data: {},
-        });
+        return res.status(501).send({ message: "server error.", data: {}, });
     }
 };
 exports.getSaveDocument = async (req, res) => {
