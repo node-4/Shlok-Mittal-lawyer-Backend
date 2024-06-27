@@ -240,7 +240,7 @@ exports.update = async (req, res) => {
     try {
         const { fullName, email, phone, password, bio, hearingFee, availability, languages, consultancyCost, lawyerStatus } = req.body;
         console.log("==================", req.body);
-        const user = await User.findById(req.user._id);
+        let user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).send({ message: "not found" });
         }
@@ -269,7 +269,7 @@ exports.update = async (req, res) => {
             consultancyCost: consultancyCost || user.consultancyCost,
             lawyerStatus: lawyerStatus || user.lawyerStatus,
         }
-        const updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true });
+        let updated = await User.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true });
         return res.status(200).send({ message: "updated", data: updated });
     } catch (err) {
         console.log("---------------", err);
