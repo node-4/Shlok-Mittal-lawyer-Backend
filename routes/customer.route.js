@@ -47,6 +47,7 @@ module.exports = (app) => {
     app.post("/api/v1/user/addMoney", [authJwt.verifyToken], wallet.addMoney);
     app.post("/api/v1/user/removeMoney", [authJwt.verifyToken], wallet.removeMoney);
     app.get("/api/v1/user/getWallet", [authJwt.verifyToken], wallet.getWallet);
+    app.post("/api/v1/user/payNow", [authJwt.verifyToken], wallet.payNow);
     app.get("/api/v1/user/allTransactionUser", [authJwt.verifyToken], wallet.allTransactionUser);
     app.get("/api/v1/user/allcreditTransactionUser", [authJwt.verifyToken], wallet.allcreditTransactionUser);
     app.get("/api/v1/user/allDebitTransactionUser", [authJwt.verifyToken], wallet.allDebitTransactionUser);

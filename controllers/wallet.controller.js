@@ -66,7 +66,7 @@ exports.getWallet = async (req, res) => {
 };
 exports.allTransactionUser = async (req, res) => {
         try {
-                const data = await transaction.find({ user: req.user.id }).populate("user");
+                const data = await transaction.find({ user: req.user.id }).populate("user user2");
                 return res.status(200).json({ data: data });
         } catch (err) {
                 return res.status(400).json({ message: err.message });
@@ -74,7 +74,7 @@ exports.allTransactionUser = async (req, res) => {
 };
 exports.allcreditTransactionUser = async (req, res) => {
         try {
-                const data = await transaction.find({ user: req.user.id, type: "Credit" });
+                const data = await transaction.find({ user: req.user.id, type: "Credit" }).populate("user user2");;
                 return res.status(200).json({ data: data });
         } catch (err) {
                 return res.status(400).json({ message: err.message });
@@ -82,7 +82,7 @@ exports.allcreditTransactionUser = async (req, res) => {
 };
 exports.allDebitTransactionUser = async (req, res) => {
         try {
-                const data = await transaction.find({ user: req.user.id, type: "Debit" });
+                const data = await transaction.find({ user: req.user.id, type: "Debit" }).populate("user user2");;
                 return res.status(200).json({ data: data });
         } catch (err) {
                 return res.status(400).json({ message: err.message });
@@ -90,7 +90,7 @@ exports.allDebitTransactionUser = async (req, res) => {
 };
 exports.allTransaction = async (req, res) => {
         try {
-                const data = await transaction.find({}).populate("user");
+                const data = await transaction.find({}).populate("user user2");
                 if (data.length > 0) {
                         return res.status(200).json({ message: "get Profile", data: data });
                 } else {
@@ -152,5 +152,51 @@ exports.withdrawApprove = async (req, res, next) => {
                 }
         } catch (error) {
                 return res.status(500).json({ status: 500, message: "Internal server error", data: error, });
+        }
+};
+exports.payNow = async (req, res) => {
+        try {
+                const data = await User.findOne({ _id: req.user.id, });
+                if (data) {
+                        if (data.wallet >= req.body.amount) {
+                                const dataReciver = await User.findOne({ _id: req.body.reciverId, });
+                                if (dataReciver) {
+                                        let update = await User.findByIdAndUpdate({ _id: data._id }, { $set: { wallet: data.wallet - parseInt(req.body.amount) } }, { new: true });
+                                        let update1 = await User.findByIdAndUpdate({ _id: dataReciver._id }, { $set: { wallet: data.wallet + parseInt(req.body.amount) } }, { new: true });
+                                        if (update && update1) {
+                                                let obj = {
+                                                        user: dataReciver._id,
+                                                        user2: data._id,
+                                                        date: Date.now(),
+                                                        message: "Money has been received by user ",
+                                                        amount: req.body.amount,
+                                                        type: "Credit",
+                                                };
+                                                let obj1 = {
+                                                        user: data._id,
+                                                        user2: dataReciver._id,
+                                                        date: Date.now(),
+                                                        message: "Money has been sent to lawyer ",
+                                                        amount: req.body.amount,
+                                                        type: "Debit",
+                                                };
+                                                const transaction1 = await transaction.create(obj);
+                                                const transaction2 = await transaction.create(obj1);
+                                                if (transaction2 && transaction1) {
+                                                        return res.status(200).json({ status: 200, message: "Money has been sent to lawyer.", data: transaction2, });
+                                                }
+                                        }
+                                } else {
+                                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                                }
+                        } else {
+                                return res.status(404).json({ status: 404, message: "You have in sufficient balance", data: {} });
+                        }
+                } else {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                }
+        } catch (error) {
+                console.log(error);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
         }
 };
