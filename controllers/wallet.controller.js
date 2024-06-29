@@ -6,17 +6,27 @@ exports.addMoney = async (req, res) => {
                 if (data) {
                         let update = await User.findByIdAndUpdate({ _id: data._id }, { $set: { wallet: data.wallet + parseInt(req.body.amount) } }, { new: true });
                         if (update) {
-                                let obj = {
-                                        user: req.user.id,
-                                        date: Date.now(),
-                                        amount: req.body.amount,
-                                        type: "Credit",
-                                };
+                                let obj;
+                                if (req.body.id != (null || undefined)) {
+                                        obj = {
+                                                id: req.body.id,
+                                                user: req.user.id,
+                                                date: Date.now(),
+                                                amount: req.body.amount,
+                                                type: "Credit",
+                                        };
+                                } else {
+                                        obj = {
+                                                user: req.user.id,
+                                                date: Date.now(),
+                                                amount: req.body.amount,
+                                                type: "Credit",
+                                        };
+                                }
                                 const data1 = await transaction.create(obj);
                                 if (data1) {
                                         return res.status(200).json({ status: 200, message: "Money has been added.", data: update, });
                                 }
-
                         }
                 } else {
                         return res.status(404).json({ status: 404, message: "No data found", data: {} });
@@ -32,12 +42,23 @@ exports.removeMoney = async (req, res) => {
                 if (data) {
                         let update = await User.findByIdAndUpdate({ _id: data._id }, { $set: { wallet: data.wallet - parseInt(req.body.amount) } }, { new: true });
                         if (update) {
-                                let obj = {
-                                        user: req.user.id,
-                                        date: Date.now(),
-                                        amount: req.body.amount,
-                                        type: "Debit",
-                                };
+                                let obj;
+                                if (req.body.id != (null || undefined)) {
+                                        obj = {
+                                                id: req.body.id,
+                                                user: req.user.id,
+                                                date: Date.now(),
+                                                amount: req.body.amount,
+                                                type: "Debit",
+                                        };
+                                } else {
+                                        obj = {
+                                                user: req.user.id,
+                                                date: Date.now(),
+                                                amount: req.body.amount,
+                                                type: "Debit",
+                                        };
+                                }
                                 const data1 = await transaction.create(obj);
                                 if (data1) {
                                         return res.status(200).json({ status: 200, message: "Money has been deducted.", data: update, });
@@ -164,22 +185,44 @@ exports.payNow = async (req, res) => {
                                         let update = await User.findByIdAndUpdate({ _id: data._id }, { $set: { wallet: data.wallet - parseInt(req.body.amount) } }, { new: true });
                                         let update1 = await User.findByIdAndUpdate({ _id: dataReciver._id }, { $set: { wallet: data.wallet + parseInt(req.body.amount) } }, { new: true });
                                         if (update && update1) {
-                                                let obj = {
-                                                        user: dataReciver._id,
-                                                        user2: data._id,
-                                                        date: Date.now(),
-                                                        message: "Money has been received by user ",
-                                                        amount: req.body.amount,
-                                                        type: "Credit",
-                                                };
-                                                let obj1 = {
-                                                        user: data._id,
-                                                        user2: dataReciver._id,
-                                                        date: Date.now(),
-                                                        message: "Money has been sent to lawyer ",
-                                                        amount: req.body.amount,
-                                                        type: "Debit",
-                                                };
+                                                let obj, obj1;
+                                                if (req.body.id != (null || undefined)) {
+                                                        obj = {
+                                                                user: dataReciver._id,
+                                                                id: req.body.id,
+                                                                user2: data._id,
+                                                                date: Date.now(),
+                                                                message: "Money has been received by user ",
+                                                                amount: req.body.amount,
+                                                                type: "Credit",
+                                                        };
+                                                        obj1 = {
+                                                                user: data._id,
+                                                                id: req.body.id,
+                                                                user2: dataReciver._id,
+                                                                date: Date.now(),
+                                                                message: "Money has been sent to lawyer ",
+                                                                amount: req.body.amount,
+                                                                type: "Debit",
+                                                        };
+                                                } else {
+                                                        obj = {
+                                                                user: dataReciver._id,
+                                                                user2: data._id,
+                                                                date: Date.now(),
+                                                                message: "Money has been received by user ",
+                                                                amount: req.body.amount,
+                                                                type: "Credit",
+                                                        };
+                                                        obj1 = {
+                                                                user: data._id,
+                                                                user2: dataReciver._id,
+                                                                date: Date.now(),
+                                                                message: "Money has been sent to lawyer ",
+                                                                amount: req.body.amount,
+                                                                type: "Debit",
+                                                        };
+                                                }
                                                 const transaction1 = await transaction.create(obj);
                                                 const transaction2 = await transaction.create(obj1);
                                                 if (transaction2 && transaction1) {

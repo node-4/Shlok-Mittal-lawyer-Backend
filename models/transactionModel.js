@@ -13,6 +13,9 @@ const transactionSchema = mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    gst: {
+        type: Number,
+    },
     amount: {
         type: Number,
     },
@@ -52,6 +55,11 @@ const transactionSchema = mongoose.Schema({
     Status: {
         type: String,
     },
+    transactionType: {
+        type: String,
+        enum: ["order", "Wallet"],
+        default: "Wallet",
+    }
 
 });
 
