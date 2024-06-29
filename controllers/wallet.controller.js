@@ -251,7 +251,7 @@ exports.payNowForWebsite = async (req, res) => {
                                 const dataReciver = await User.findOne({ _id: req.body.reciverId, });
                                 if (dataReciver) {
                                         let update1 = await User.findByIdAndUpdate({ _id: dataReciver._id }, { $set: { wallet: data.wallet + parseInt(req.body.amount) } }, { new: true });
-                                        if (update && update1) {
+                                        if (update1) {
                                                 let obj, obj1;
                                                 if (req.body.id != (null || undefined)) {
                                                         obj = {
