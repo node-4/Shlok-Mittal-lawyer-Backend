@@ -347,17 +347,30 @@ exports.createAppointment = async (req, res) => {
     try {
         const findUser = await User.findById({ _id: req.user._id });
         if (findUser) {
-            let data = {
-                lawyer: req.body.lawyerId,
-                userId: req.user._id,
-                case: req.body.caseId,
-                appointmentDate: req.body.appointmentDate,
-                appointmentType: req.body.appointmentType,
-                appointmentTime: req.body.appointmentTime,
-                callType: "BOOKING"
-            };
-            const Data = await appointment.create(data);
-            return res.status(200).json(Data);
+            if (req.body.caseId != (null || undefined)) {
+                let data = {
+                    lawyer: req.body.lawyerId,
+                    userId: req.user._id,
+                    case: req.body.caseId,
+                    appointmentDate: req.body.appointmentDate,
+                    appointmentType: req.body.appointmentType,
+                    appointmentTime: req.body.appointmentTime,
+                    callType: "BOOKING"
+                };
+                const Data = await appointment.create(data);
+                return res.status(200).json(Data);
+            } else {
+                let data = {
+                    lawyer: req.body.lawyerId,
+                    userId: req.user._id,
+                    appointmentDate: req.body.appointmentDate,
+                    appointmentType: req.body.appointmentType,
+                    appointmentTime: req.body.appointmentTime,
+                    callType: "BOOKING"
+                };
+                const Data = await appointment.create(data);
+                return res.status(200).json(Data);
+            }
         } else {
             return res.status(404).send({ message: "Document not found.", data: {} });
         }
