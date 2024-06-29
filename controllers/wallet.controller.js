@@ -243,3 +243,70 @@ exports.payNow = async (req, res) => {
                 return res.status(501).send({ status: 501, message: "server error.", data: {}, });
         }
 };
+exports.payNowForWebsite = async (req, res) => {
+        try {
+                const data = await User.findOne({ _id: req.user.id, });
+                if (data) {
+                        if (data.wallet >= req.body.amount) {
+                                const dataReciver = await User.findOne({ _id: req.body.reciverId, });
+                                if (dataReciver) {
+                                        let update1 = await User.findByIdAndUpdate({ _id: dataReciver._id }, { $set: { wallet: data.wallet + parseInt(req.body.amount) } }, { new: true });
+                                        if (update && update1) {
+                                                let obj, obj1;
+                                                if (req.body.id != (null || undefined)) {
+                                                        obj = {
+                                                                user: dataReciver._id,
+                                                                id: req.body.id,
+                                                                user2: data._id,
+                                                                date: Date.now(),
+                                                                message: "Money has been received by user ",
+                                                                amount: req.body.amount,
+                                                                type: "Credit",
+                                                        };
+                                                        obj1 = {
+                                                                user: data._id,
+                                                                id: req.body.id,
+                                                                user2: dataReciver._id,
+                                                                date: Date.now(),
+                                                                message: "Money has been sent to lawyer ",
+                                                                amount: req.body.amount,
+                                                                type: "Debit",
+                                                        };
+                                                } else {
+                                                        obj = {
+                                                                user: dataReciver._id,
+                                                                user2: data._id,
+                                                                date: Date.now(),
+                                                                message: "Money has been received by user ",
+                                                                amount: req.body.amount,
+                                                                type: "Credit",
+                                                        };
+                                                        obj1 = {
+                                                                user: data._id,
+                                                                user2: dataReciver._id,
+                                                                date: Date.now(),
+                                                                message: "Money has been sent to lawyer ",
+                                                                amount: req.body.amount,
+                                                                type: "Debit",
+                                                        };
+                                                }
+                                                const transaction1 = await transaction.create(obj);
+                                                const transaction2 = await transaction.create(obj1);
+                                                if (transaction2 && transaction1) {
+                                                        return res.status(200).json({ status: 200, message: "Money has been sent to lawyer.", data: transaction2, });
+                                                }
+                                        }
+                                } else {
+                                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                                }
+                        } else {
+                                return res.status(404).json({ status: 404, message: "You have in sufficient balance", data: {} });
+                        }
+                } else {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                }
+        } catch (error) {
+                console.log(error);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+        }
+};
