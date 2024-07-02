@@ -566,6 +566,33 @@ exports.getCase = async (req, res) => {
         });
     }
 };
+exports.getFilterCase = async (req, res) => {
+    try {
+        let query = { userId: req.user._id }, sort;
+        if (req.query.oldNew != 'old') {
+            sort = { createdAt: 1 }
+        } else {
+            sort = { createdAt: -1 }
+        }
+        if (req.query.caseNumber) {
+            query.caseNumber = req.query.caseNumber;
+        }
+        if (req.query.caseTitle) {
+            query.caseTitle = req.query.caseTitle;
+        }
+        if (req.query.courtName) {
+            query.courtNumber = req.query.courtName;
+        }
+        const data = await caseModel.find(query).populate('lawyer userId notes').sort(sort);
+        if (!data || data.length === 0) {
+            return res.status(400).send({ status: 404, msg: "not found", data: [] });
+        }
+        return res.status(200).send({ status: 200, msg: "Data found", data: data });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ msg: "internal server error ", error: err.message, });
+    }
+};
 exports.getrefferalCode = async (req, res) => {
     try {
         const usersDocument = await userModel.findOne({ _id: req.user._id, });

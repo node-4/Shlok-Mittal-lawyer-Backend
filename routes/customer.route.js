@@ -53,6 +53,7 @@ module.exports = (app) => {
     app.get("/api/v1/user/allcreditTransactionUser", [authJwt.verifyToken], wallet.allcreditTransactionUser);
     app.get("/api/v1/user/allDebitTransactionUser", [authJwt.verifyToken], wallet.allDebitTransactionUser);
     app.get("/api/v1/customer/getCase", [authJwt.verifyToken], auth.getCase);
+    app.get("/api/v1/customer/getFilterCase", [authJwt.verifyToken], auth.getFilterCase);
     app.get("/api/v1/customer/getrefferalCode", [authJwt.verifyToken], auth.getrefferalCode);
     app.get("/api/v1/customer/getmyLawyer", [authJwt.verifyToken], auth.getAllLawyer);
     app.get("/api/v1/customer/getLawyersbyRating/:rating", auth.getLawyersbyRating);
